@@ -1,8 +1,7 @@
-import './App.css'
-import { LandingPage } from './components'
+import { FinancialDashboard } from './components/FinancialDashboard'
 
 function App() {
-  return <LandingPage />
+  return <FinancialDashboard />
 }
 
 export default App
