@@ -1,4 +1,6 @@
 google-adk
 python-dotenv 
 fastapi 
-uvicorn 
+uvicorn
+psycopg2-binary
+sqlalchemy 
