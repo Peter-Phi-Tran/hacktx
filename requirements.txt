@@ -9,6 +9,7 @@ fastapi
 uvicorn
 pydantic
 pydantic-settings
+itsdangerous
 
 # Database
 psycopg2-binary

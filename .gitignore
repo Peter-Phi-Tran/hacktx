@@ -17,7 +17,6 @@ build/
 
 # Database
 *.db
-*.sqlite3
 postgres_data/
 
 # Docker
@@ -40,3 +39,6 @@ Thumbs.db
 
 DATABASE_SETUP.md
 node_modules/
+.env.example
+start-backend.sh
+start-database.sh
