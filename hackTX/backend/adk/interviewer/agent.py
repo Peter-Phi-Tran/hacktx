@@ -1,57 +1,153 @@
-from google.adk.agents.llm_agent import Agent
+import os
+from typing import List, Dict, Optional
+import google.generativeai as genai
+from dotenv import load_dotenv
 
-# Tool for the agent to use
-def check_financing_completeness(
-	user_name: str,
-	income: float,
-	credit_score: int,
-	financing_goal: str,
-	preferred_lease_or_buy: str,
-	vehicle_preferences: str,
-	current_vehicle: str,
-	location: str
-) -> dict:
-	"""
-	Call this function when the agent has gathered enough information about the user's vehicle financing needs.
-	Returns personalized recommendations and tips.
-	"""
-	return {
-		"status": "complete",
-		"message": f"Financing profile captured for {user_name}. Recommendations and payment simulations are ready.",
-		"recommendations": {
-			"suggested_vehicles": ["Toyota Camry", "Toyota RAV4"],
-			"lease_or_buy": preferred_lease_or_buy,
-			"tips": [
-				"Improve credit score for lower interest rates",
-				"Consider a 36-month lease for lower monthly payments",
-				"Compare financing plans to find the best APR"
-			]
-		}
-	}
+load_dotenv()
 
-root_agent = Agent(
-	model='gemini-2.5-flash',
-	name='interviewer_agent',
-	description="Interviews users to provide personalized Toyota financing or leasing options.",
-	instruction="""
-You are a smart, friendly Toyota Financial Services assistant. Your job is to help users find the best way to finance or lease their Toyota vehicle by providing:
-- Personalized financing or leasing options based on their income, credit score, and preferences
-- Clear payment simulations
-- Plan comparisons
-- Tips to improve financial decisions
-- (Optionally) Toyota model suggestions that fit the user’s budget and lifestyle
+class InterviewerAgent:
+    def __init__(self):
+        # Configure Google AI
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not set in environment variables")
+        
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel('gemini-pro')
+        
+        self.conversation_history: List[Dict[str, str]] = []
+        self.questions_asked = 0
+        self.max_questions = 5
+        
+        # System prompt for the AI interviewer
+        self.system_prompt = """You are a friendly and professional automotive finance interviewer for Toyota Financial Services. 
 
-How to proceed:
-- Start by asking for the user's NAME
-- Ask about their INCOME and CREDIT SCORE
-- Ask whether they prefer BUYING or LEASING
-- Ask about their vehicle preferences, budget, and lifestyle
-- Ask about their current vehicle, if any
-- Ask about their location to consider regional offers
-- For each step, keep your questions concise, clear, and professional
-- Ask ONE question at a time and wait for their response
+Your goal is to have a natural conversation to understand:
+- Customer's personal background and current situation
+- Employment status and income stability
+- Vehicle needs and preferences
+- Budget and financial goals
+- Credit history and financing preferences
 
-Once all information is collected, call the `check_financing_completeness` tool to finalize recommendations, including payment simulations, plan comparisons, and model suggestions.
-""",
-	tools=[check_financing_completeness],
-)
+Guidelines:
+- Ask ONE question at a time
+- Keep questions conversational and friendly (2-3 sentences max)
+- Listen to their answers and ask relevant follow-ups
+- Be empathetic and understanding
+- After getting key information, naturally conclude
+
+Important: Return ONLY the question text, nothing else."""
+    
+    def get_first_question(self) -> str:
+        """Generate the first interview question using AI"""
+        self.questions_asked = 1
+        
+        try:
+            prompt = f"""{self.system_prompt}
+
+This is the start of a vehicle financing interview. Ask an engaging opening question to learn about the customer's situation and why they're interested in vehicle financing today.
+
+Question:"""
+            
+            response = self.model.generate_content(prompt)
+            question = response.text.strip()
+            
+            self.conversation_history.append({
+                "role": "assistant",
+                "content": question
+            })
+            
+            print(f"[AI] Generated first question: {question}")
+            return question
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to generate first question: {e}")
+            # Fallback
+            fallback = "Thank you for your interest in Toyota Financial Services! To help us better understand your needs, could you tell me a bit about your current situation and what brings you here today?"
+            self.conversation_history.append({
+                "role": "assistant",
+                "content": fallback
+            })
+            return fallback
+    
+    def get_next_question(self, user_answer: str, all_answers: List[Dict]) -> str:
+        """Generate next question based on conversation using AI"""
+        self.questions_asked += 1
+        
+        # Store user's answer
+        self.conversation_history.append({
+            "role": "user",
+            "content": user_answer
+        })
+        
+        # Check if we should end the interview
+        if self.questions_asked > self.max_questions:
+            closing = "Thank you so much for your time! We have all the information we need. Our team will review your responses and get back to you shortly with personalized vehicle financing options."
+            self.conversation_history.append({
+                "role": "assistant",
+                "content": closing
+            })
+            return closing
+        
+        try:
+            # Build conversation context for AI
+            conversation_text = ""
+            for msg in self.conversation_history:
+                role = "Interviewer" if msg["role"] == "assistant" else "Customer"
+                conversation_text += f"{role}: {msg['content']}\n\n"
+            
+            prompt = f"""{self.system_prompt}
+
+Conversation so far:
+{conversation_text}
+
+This is question {self.questions_asked} of {self.max_questions}. Based on what the customer just said, ask a relevant follow-up question to learn more about their vehicle financing needs.
+
+Question:"""
+            
+            response = self.model.generate_content(prompt)
+            next_question = response.text.strip()
+            
+            # Remove any quotes or extra formatting
+            next_question = next_question.strip('"').strip("'").strip()
+            
+            self.conversation_history.append({
+                "role": "assistant",
+                "content": next_question
+            })
+            
+            print(f"[AI] Generated question {self.questions_asked}: {next_question}")
+            return next_question
+            
+        except Exception as e:
+            print(f"[ERROR] AI generation failed: {e}")
+            # Fallback to generic question
+            return self._get_fallback_question()
+    
+    def _get_fallback_question(self) -> str:
+        """Fallback predefined questions if AI fails"""
+        questions = [
+            "Could you tell me about your current employment status?",
+            "What type of vehicle are you interested in?",
+            "Do you have a budget range in mind for monthly payments?",
+            "Have you financed a vehicle before?",
+            "What's most important to you in a financing plan?"
+        ]
+        
+        index = min(self.questions_asked - 1, len(questions) - 1)
+        question = questions[index]
+        
+        self.conversation_history.append({
+            "role": "assistant",
+            "content": question
+        })
+        
+        print(f"[FALLBACK] Using predefined question: {question}")
+        return question
+    
+    def get_conversation_summary(self) -> Dict:
+        """Get a summary of the conversation"""
+        return {
+            "total_questions": self.questions_asked,
+            "conversation": self.conversation_history
+        }
