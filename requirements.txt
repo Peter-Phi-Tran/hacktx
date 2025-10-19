@@ -1,7 +1,23 @@
+# Google AI
 google-genai
+
+# Environment
 python-dotenv 
-fastapi 
+
+# FastAPI and dependencies
+fastapi
 uvicorn
 pydantic
+pydantic-settings
+
+# Database
 psycopg2-binary
-sqlalchemy 
+sqlalchemy
+
+# Authentication (for future OAuth implementation)
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# HTTP client for async requests
+httpx 
