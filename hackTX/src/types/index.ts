@@ -71,15 +71,15 @@ export type Priority = 'safety' | 'fuel_efficiency' | 'cargo_space' | 'towing' |
 export interface VehicleRecommendation {
   id: number
   vehicle: string
+  x: number
+  y: number
+  z: number
+  size: number
+  color: string
   monthly_payment: number
   affordability: AffordabilityRating
   price_range: string
   why: string
-  position: {
-    x: number
-    y: number
-    z: number
-  }
 }
 
 export interface AnalysisResponse {

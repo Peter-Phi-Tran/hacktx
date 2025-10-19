@@ -10,3 +10,6 @@ export { FinancialDashboard } from './FinancialDashboard'
 export { Car3D } from './Car3D'
 export { VehicleSphere } from './VehicleSphere'
 export { UserNode } from './UserNode'
+export { LoadingSpinner } from './LoadingSpinner'
+export { ErrorMessage } from './ErrorMessage'
+
