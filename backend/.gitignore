@@ -1,34 +1,34 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
 
-# Virtual Environment
-.venv/
+# Virtual environments
 venv/
-ENV/
+.venv/
 env/
+ENV/
 
-# Environment variables (IMPORTANT - protects your API key!)
+# Environment variables
 .env
-*.env
-!.env.example
+.env.local
 
-# ADK
-.adk/
+# Database
+*.db
+*.sqlite3
 
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
