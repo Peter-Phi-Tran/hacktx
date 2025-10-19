@@ -7,11 +7,12 @@ import { GoogleLoginButton } from './GoogleLoginButton'
 import { Features } from './Features'
 
 export const LandingPage = () => {
-  const handleGoogleLogin = () => {
-    // TODO: Implement Google OAuth authentication
-    console.log('Google login clicked')
-    // This will be connected to your backend OAuth endpoint
-  }
+  const handleSignIn = () => {
+    const raw = (import.meta.env.VITE_BACKEND_URL as string) || "http://localhost:5000";
+    const backend = raw.replace(/\/+$/, "");
+    // redirect browser to backend OAuth starter
+    window.location.href = `${backend}/auth/google`;
+  };
 
   return (
     <div className="landing-page">
@@ -22,7 +23,7 @@ export const LandingPage = () => {
         <Logo />
         <Title />
         <Tagline />
-        <GoogleLoginButton onClick={handleGoogleLogin} />
+        <GoogleLoginButton onClick={handleSignIn} />
         <Features />
       </div>
     </div>
