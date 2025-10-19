@@ -6,6 +6,7 @@ interface ConfigPanelProps {
   setConfig: (config: FinancialConfig | ((prev: FinancialConfig) => FinancialConfig)) => void
   onAnalyze?: () => void
   onLogout?: () => void
+  onBackToInterview?: () => void
 }
 
 const vehicleTypeOptions = [
@@ -42,7 +43,8 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
   config,
   setConfig,
   onAnalyze,
-  onLogout
+  onLogout,
+  onBackToInterview
 }) => {
   const handleVehicleTypeToggle = (typeId: string) => {
     setConfig((prev) => ({
@@ -285,6 +287,13 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
       {onLogout && (
         <button onClick={onLogout} className="logout-button">
           Logout
+        </button>
+      )}
+
+      {/* Back to Interview Button (for testing) */}
+      {onBackToInterview && (
+        <button onClick={onBackToInterview} className="back-to-interview-button">
+          ← Back to Interview
         </button>
       )}
     </div>

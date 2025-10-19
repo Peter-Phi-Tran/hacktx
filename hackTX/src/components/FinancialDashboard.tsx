@@ -8,6 +8,7 @@ import { analyzeFinancialProfile } from '../api/client'
 
 interface FinancialDashboardProps {
   onLogout?: () => void
+  onBackToInterview?: () => void
 }
 
 // Generate mock stars based on config with varied 3D positioning
@@ -142,7 +143,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
   }).filter(star => star.monthly_payment <= config.monthlyBudget * 1.2)
 }
 
-export const FinancialDashboard = ({ onLogout }: FinancialDashboardProps = {}) => {
+export const FinancialDashboard = ({ onLogout, onBackToInterview }: FinancialDashboardProps = {}) => {
   const [config, setConfig] = useState<FinancialConfig>({
     income: 5000,
     creditScore: '670-739',
@@ -179,6 +180,10 @@ export const FinancialDashboard = ({ onLogout }: FinancialDashboardProps = {}) =
     setLoading(true)
     setError(null)
 
+    // Track start time for minimum loading duration
+    const startTime = Date.now()
+    const minLoadTime = 2500 // 2.5 seconds
+
     try {
       // Call the real API
       const response = await analyzeFinancialProfile(config)
@@ -198,6 +203,12 @@ export const FinancialDashboard = ({ onLogout }: FinancialDashboardProps = {}) =
         why: vehicle.why
       }))
 
+      // Ensure minimum loading time for better UX
+      const elapsed = Date.now() - startTime
+      const remainingTime = Math.max(0, minLoadTime - elapsed)
+      
+      await new Promise(resolve => setTimeout(resolve, remainingTime))
+      
       setStars(vehicleStars)
     } catch (err) {
       console.error('API Error:', err)
@@ -223,7 +234,12 @@ export const FinancialDashboard = ({ onLogout }: FinancialDashboardProps = {}) =
   return (
     <div className="financial-dashboard">
       {/* Loading Overlay */}
-      {loading && <LoadingSpinner />}
+      {loading && (
+        <LoadingSpinner 
+          message="Analyzing your financial constellation..."
+          subtext="Calculating optimal vehicle matches"
+        />
+      )}
       
       {/* Error Overlay */}
       {error && (
@@ -241,6 +257,7 @@ export const FinancialDashboard = ({ onLogout }: FinancialDashboardProps = {}) =
           setConfig={setConfig} 
           onAnalyze={handleAnalyze}
           onLogout={onLogout}
+          onBackToInterview={onBackToInterview}
         />
       </div>
 
