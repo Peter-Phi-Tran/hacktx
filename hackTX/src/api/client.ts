@@ -3,9 +3,12 @@
  * Handles all communication with FastAPI backend
  */
 
+import type { FinancialConfig as FrontendFinancialConfig, VehicleRecommendation } from '../types';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export interface FinancialConfig {
+// Backend API uses snake_case, so we define the backend-specific interface
+export interface BackendFinancialConfig {
   income: number;
   credit_score: string;
   down_payment: number;
@@ -14,20 +17,6 @@ export interface FinancialConfig {
   vehicle_types: string[];
   priorities: string[];
   additional_context: string;
-}
-
-export interface VehicleRecommendation {
-  id: number;
-  vehicle: string;
-  x: number;
-  y: number;
-  z: number;
-  size: number;
-  color: string;
-  monthly_payment: number;
-  affordability: string;
-  price_range?: string;
-  why?: string;
 }
 
 export interface AnalysisResponse {
@@ -48,18 +37,32 @@ export interface FinancingScenario {
   outcome: string;
 }
 
+// Convert frontend camelCase to backend snake_case
+function toBackendConfig(config: FrontendFinancialConfig): BackendFinancialConfig {
+  return {
+    income: config.income,
+    credit_score: config.creditScore,
+    down_payment: config.downPayment,
+    monthly_budget: config.monthlyBudget,
+    loan_term: config.loanTerm,
+    vehicle_types: config.vehicleTypes,
+    priorities: config.priorities,
+    additional_context: config.additionalContext,
+  };
+}
+
 /**
  * Analyze user's financial profile and get vehicle recommendations
  */
 export async function analyzeFinancialProfile(
-  config: FinancialConfig
+  config: FrontendFinancialConfig
 ): Promise<AnalysisResponse> {
   const response = await fetch(`${API_BASE_URL}/api/analyze`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ config }),
+    body: JSON.stringify({ config: toBackendConfig(config) }),
   });
 
   if (!response.ok) {

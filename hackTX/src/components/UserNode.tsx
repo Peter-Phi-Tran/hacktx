@@ -1,12 +1,5 @@
 import * as THREE from 'three'
-
-interface UserConfig {
-  income: number
-  creditScore: string
-  downPayment: number
-  monthlyBudget: number
-  loanTerm: number
-}
+import type { UserConfig } from '../types'
 
 interface UserNodeProps {
   userConfig: UserConfig

@@ -883,6 +883,33 @@ body {
   transform: translateY(0);
 }
 
+.logout-button {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  margin-top: 0.5rem;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fee2e2;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.logout-button:active {
+  transform: translateY(2px);
+}
+
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
