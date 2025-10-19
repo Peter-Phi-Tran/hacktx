@@ -39,7 +39,11 @@ class AnswerRequest(BaseModel):
 class AnswerResponse(BaseModel):
     next_question: str
     is_complete: bool
+    is_followup: Optional[bool] = False
+    validation: Optional[Dict] = None
     progress: Optional[Dict] = None
+    analysis: Optional[Dict] = None
+    recommendations: Optional[Dict] = None
 
 # ===== AUTH ROUTES =====
 @router.get("/auth/google")
@@ -122,53 +126,60 @@ async def submit_answer(request: AnswerRequest):
         raise HTTPException(status_code=404, detail="Session not found or expired")
     
     try:
+        print(f"[INFO] Processing answer for session: {request.session_id}")
+        print(f"[INFO] User answer: {request.answer}")
+        
         session = interview_sessions[request.session_id]
         agent: RootAgent = session["agent"]
         
-        # Process answer through ADK agent
+        # Process answer through ADK agent (includes validation)
         response = agent.process_answer(request.answer)
         
-        # If interview is complete, save data
+        print(f"[INFO] Next question: {response['next_question']}")
+        print(f"[INFO] Is complete: {response['is_complete']}")
+        
+        if response.get('validation'):
+            print(f"[INFO] Validation quality: {response['validation'].get('quality_score', 'N/A')}")
+        
+        # If interview is complete, save data and return analysis
         if response["is_complete"]:
             session["final_data"] = agent.get_session_data()
-            print(f"Interview completed. Data: {session['final_data']}")
+            print(f"[INFO] Interview completed. Analysis and recommendations generated.")
         
         return AnswerResponse(
             next_question=response["next_question"],
             is_complete=response["is_complete"],
-            progress=response.get("progress")
+            is_followup=response.get("is_followup", False),
+            validation=response.get("validation"),
+            progress=response.get("progress"),
+            analysis=response.get("analysis"),
+            recommendations=response.get("recommendations")
         )
     except Exception as e:
+        print(f"[ERROR] Failed to process answer: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to process answer: {str(e)}")
 
-@router.post("/api/interview/end")
-async def end_interview(session_id: str):
-    """End interview session"""
-    if session_id in interview_sessions:
-        # Get final data before cleanup
-        final_data = interview_sessions[session_id]["agent"].get_session_data()
-        
-        # Here you can save to database
-        # db.save_interview(final_data)
-        
-        del interview_sessions[session_id]
-        
-        return {"status": "success", "message": "Interview ended", "data": final_data}
-    
-    return {"status": "success", "message": "Session already ended"}
-
-@router.get("/api/interview/status/{session_id}")
-async def get_interview_status(session_id: str):
-    """Get current interview status"""
+# Add new endpoint to get results
+@router.get("/api/interview/results/{session_id}")
+async def get_interview_results(session_id: str):
+    """Get complete interview results including analysis and recommendations"""
     if session_id not in interview_sessions:
         raise HTTPException(status_code=404, detail="Session not found")
     
     session = interview_sessions[session_id]
     agent: RootAgent = session["agent"]
     
+    analysis = agent.get_analysis()
+    recommendations = agent.get_recommendations()
+    
+    if not analysis or not recommendations:
+        raise HTTPException(status_code=400, detail="Interview not yet complete")
+    
     return {
         "session_id": session_id,
-        "questions_asked": agent.interviewer.questions_asked,
-        "max_questions": agent.interviewer.max_questions,
-        "is_complete": agent.interviewer.questions_asked > agent.interviewer.max_questions
+        "analysis": analysis,
+        "recommendations": recommendations,
+        "conversation": agent.interviewer.get_conversation_summary()
     }

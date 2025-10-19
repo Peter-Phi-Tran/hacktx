@@ -19,6 +19,8 @@ export default function InterviewPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [recommendations, setRecommendations] = useState<any>(null);
   
   const transcriptRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -118,9 +120,24 @@ export default function InterviewPage() {
       const data = await response.json();
       console.log('[Frontend] Received response:', data);
 
+      // Show validation feedback if quality is low
+      if (data.validation && data.validation.quality_score < 0.5) {
+        console.log('[Frontend] Low quality answer, showing suggestion');
+        
+        if (data.validation.suggestion && !data.is_followup) {
+          const suggestionMessage: TranscriptTurn = {
+            sender: "agent",
+            username: "SYSTEM",
+            text: `💡 ${data.validation.suggestion}`,
+            time: getTime(),
+          };
+          setTranscript(prev => [...prev, suggestionMessage]);
+        }
+      }
+
       const agentResponse: TranscriptTurn = {
         sender: "agent",
-        username: "INTERVIEWER",
+        username: data.is_followup ? "INTERVIEWER (Follow-up)" : "INTERVIEWER",
         text: data.next_question,
         time: getTime(),
       };
@@ -130,6 +147,14 @@ export default function InterviewPage() {
       if (data.is_complete) {
         console.log('[Frontend] Interview complete');
         setIsComplete(true);
+        
+        // Store analysis and recommendations
+        if (data.analysis) {
+          setAnalysis(data.analysis);
+        }
+        if (data.recommendations) {
+          setRecommendations(data.recommendations);
+        }
       }
     } catch (err) {
       console.error('[Frontend] Failed to send answer:', err);
