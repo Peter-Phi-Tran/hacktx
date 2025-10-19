@@ -28,7 +28,6 @@ export default function InterviewPage() {
   // Start interview on mount
   useEffect(() => {
     const startInterview = async () => {
-      console.log('[Frontend] Starting interview...');
       try {
         setIsLoading(true);
         const response = await fetch(`${API_BASE_URL}/api/interview/start`, {
@@ -43,7 +42,6 @@ export default function InterviewPage() {
         }
 
         const data = await response.json();
-        console.log('[Frontend] Interview started:', data);
         
         setSessionId(data.session_id);
         
@@ -86,8 +84,6 @@ export default function InterviewPage() {
     e.preventDefault();
     if (!input.trim() || !sessionId || isLoading || isComplete) return;
 
-    console.log('[Frontend] Submitting answer:', input);
-
     const userMessage: TranscriptTurn = {
       sender: "user",
       username: "YOU",
@@ -118,12 +114,9 @@ export default function InterviewPage() {
       }
 
       const data = await response.json();
-      console.log('[Frontend] Received response:', data);
 
       // Show validation feedback if quality is low
       if (data.validation && data.validation.quality_score < 0.5) {
-        console.log('[Frontend] Low quality answer, showing suggestion');
-        
         if (data.validation.suggestion && !data.is_followup) {
           const suggestionMessage: TranscriptTurn = {
             sender: "agent",
@@ -145,7 +138,6 @@ export default function InterviewPage() {
       setTranscript(prev => [...prev, agentResponse]);
       
       if (data.is_complete) {
-        console.log('[Frontend] Interview complete');
         setIsComplete(true);
         
         // Store analysis and recommendations

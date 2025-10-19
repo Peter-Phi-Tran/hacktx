@@ -27,8 +27,8 @@ class Settings(BaseSettings):
     # CORS Configuration
     cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]
     
-    # Database Configuration
-    database_url: str = os.getenv("DATABASE_URL", "sqlite:///./interview.db")
+    # Database Configuration - PostgreSQL only
+    database_url: str = os.getenv("DATABASE_URL", "")
     
     # Google AI Configuration
     google_api_key: str = os.getenv("GOOGLE_API_KEY", "")

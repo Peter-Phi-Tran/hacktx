@@ -6,10 +6,12 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from typing import Optional, Dict
 from authlib.integrations.starlette_client import OAuth
-from .config import settings
-from .adk.root_agent import RootAgent
+import traceback
 import secrets
 import uuid
+
+from .config import settings
+from .adk.root_agent import RootAgent
 
 router = APIRouter()
 
@@ -126,25 +128,15 @@ async def submit_answer(request: AnswerRequest):
         raise HTTPException(status_code=404, detail="Session not found or expired")
     
     try:
-        print(f"[INFO] Processing answer for session: {request.session_id}")
-        print(f"[INFO] User answer: {request.answer}")
-        
         session = interview_sessions[request.session_id]
         agent: RootAgent = session["agent"]
         
         # Process answer through ADK agent (includes validation)
         response = agent.process_answer(request.answer)
         
-        print(f"[INFO] Next question: {response['next_question']}")
-        print(f"[INFO] Is complete: {response['is_complete']}")
-        
-        if response.get('validation'):
-            print(f"[INFO] Validation quality: {response['validation'].get('quality_score', 'N/A')}")
-        
         # If interview is complete, save data and return analysis
         if response["is_complete"]:
             session["final_data"] = agent.get_session_data()
-            print(f"[INFO] Interview completed. Analysis and recommendations generated.")
         
         return AnswerResponse(
             next_question=response["next_question"],
@@ -156,8 +148,6 @@ async def submit_answer(request: AnswerRequest):
             recommendations=response.get("recommendations")
         )
     except Exception as e:
-        print(f"[ERROR] Failed to process answer: {str(e)}")
-        import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to process answer: {str(e)}")
 
