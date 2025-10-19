@@ -133,21 +133,21 @@ export function getScenarioDetails(scenario: Record<string, unknown>): string {
   const s = scenario as unknown as AgentScenario;
 
   return `
-🚗 ${s.suggested_model}
+ ${s.suggested_model}
 
-📋 Plan: ${s.title}
+ Plan: ${s.title}
 ${s.description}
 
-💰 Financial Details:
+ Financial Details:
 • Down Payment: $${s.down_payment.toLocaleString()}
 • Monthly Payment: $${s.monthly_payment.toLocaleString()}
 • Term: ${s.term_months} months (${Math.floor(s.term_months / 12)} years)
 • Interest Rate: ${s.interest_rate}%
-• Type: ${s.plan_type === "finance" ? "🏦 Financing" : "📄 Lease"}
+• Type: ${s.plan_type === "finance" ? " Financing" : " Lease"}
 
-⭐ Match Score: ${s.positivity_score}/100
+ Match Score: ${s.positivity_score}/100
 
-💡 Expert Recommendation:
+ Expert Recommendation:
 ${s.recommendations}
   `.trim();
 }

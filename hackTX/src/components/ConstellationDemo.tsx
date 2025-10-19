@@ -35,16 +35,16 @@ const LEVEL_TO_BRANCH: Record<number, BranchType> = {
 
 // Branch display names
 const BRANCH_NAMES: Record<BranchType, string> = {
-  financing: "💰 Payment Structures",
-  trim_levels: "🚗 Vehicle Trims",
-  add_ons: "📦 Warranties & Packages",
-  insurance: "🛡️ Insurance Options",
-  maintenance: "🔧 Service Plans",
-  trade_in: "🔄 Trade-In Scenarios",
-  lease_vs_buy: "📊 Lease vs. Buy",
-  refinancing: "💳 Refinancing",
-  early_payoff: "⚡ Early Payoff",
-  alternatives: "🔀 Alternative Vehicles",
+  financing: " Payment Structures",
+  trim_levels: " Vehicle Trims",
+  add_ons: " Warranties & Packages",
+  insurance: " Insurance Options",
+  maintenance: " Service Plans",
+  trade_in: " Trade-In Scenarios",
+  lease_vs_buy: " Lease vs. Buy",
+  refinancing: " Refinancing",
+  early_payoff: " Early Payoff",
+  alternatives: " Alternative Vehicles",
 };
 
 interface ConstellationDemoProps {
@@ -96,7 +96,7 @@ export const ConstellationDemo = ({
   };
 
   const handleExpandNode = async (parentStar: VehicleStar) => {
-    console.log("🚗 Expanding node:", parentStar);
+    console.log(" Expanding node:", parentStar);
 
     // Prepare parent scenario data for the API - ensure all required fields are present
     const parentScenario = {
@@ -138,8 +138,8 @@ export const ConstellationDemo = ({
       const branchType = LEVEL_TO_BRANCH[nextLevel];
       const branchName = BRANCH_NAMES[branchType];
 
-      console.log(`📍 Level ${nextLevel}: ${branchName}`);
-      console.log("📤 Request data:", {
+      console.log(` Level ${nextLevel}: ${branchName}`);
+      console.log(" Request data:", {
         parentScenario,
         userProfile,
         nextLevel,
@@ -153,9 +153,9 @@ export const ConstellationDemo = ({
       );
 
       console.log(
-        `✅ Received ${response.children.length} level-${nextLevel} scenarios (${branchName})`
+        `Received ${response.children.length} level-${nextLevel} scenarios (${branchName})`
       );
-      console.log("📥 Response data:", response);
+      console.log("Response data:", response);
 
       // Collect all existing node positions for collision detection
       const existingPositions = allStars.map(star => ({
@@ -202,7 +202,7 @@ export const ConstellationDemo = ({
           const inheritedPlanType = parentStar.scenarioType || "finance";
           const inheritedColor = inheritedPlanType === "finance" ? "#4A90E2" : "#10B981";
           
-          console.log(`  🎨 Child ${index + 1}: Inheriting from parent - Type: ${inheritedPlanType}, Color: ${inheritedColor}`);
+          console.log(`  Child ${index + 1}: Inheriting from parent - Type: ${inheritedPlanType}, Color: ${inheritedColor}`);
 
           return {
             id: allStars.length + index + 1,
@@ -238,9 +238,9 @@ export const ConstellationDemo = ({
         return [...filtered, updatedParent, ...childStars];
       });
 
-      console.log("🎉 Node expanded successfully!");
+      console.log(" Node expanded successfully!");
     } catch (error) {
-      console.error("❌ Error expanding node:", error);
+      console.error(" Error expanding node:", error);
       throw error;
     }
   };
