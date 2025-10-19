@@ -1,30 +1,50 @@
+"""
+Tachyon API - FastAPI Application
+AI-powered financial advisor for Toyota vehicle financing
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import os
 
-# Load environment variables
-load_dotenv()
+from .config import settings
+from .routes import router
 
-app = FastAPI(title="Tachyon API")
+
+# Initialize FastAPI app
+app = FastAPI(
+    title=settings.app_name,
+    description=settings.app_description,
+    version=settings.app_version
+)
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Vite dev server
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(router)
+
+
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Tachyon API"}
+    """Root endpoint with API information"""
+    return {
+        "message": f"Welcome to {settings.app_name}",
+        "version": settings.app_version,
+        "docs": "/docs",
+        "health": "/health"
+    }
 
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "hackTX.backend.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.reload
+    )
