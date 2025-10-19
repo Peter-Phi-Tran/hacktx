@@ -27,7 +27,7 @@ interface VehicleStar {
   why?: string
 }
 
-// Generate mock stars based on config
+// Generate mock stars based on config with varied 3D positioning
 const generateStars = (config: FinancialConfig): VehicleStar[] => {
   const baseStars: VehicleStar[] = [
     {
@@ -35,7 +35,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota Camry',
       x: 50,
       y: -30,
-      z: 0,
+      z: 25,
       size: 10,
       color: '#4ade80',
       monthly_payment: 385,
@@ -48,7 +48,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota RAV4',
       x: -45,
       y: -25,
-      z: 0,
+      z: -30,
       size: 9,
       color: '#4ade80',
       monthly_payment: 420,
@@ -61,7 +61,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota Corolla',
       x: 30,
       y: 40,
-      z: 0,
+      z: 15,
       size: 8,
       color: '#4ade80',
       monthly_payment: 320,
@@ -74,7 +74,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota Highlander',
       x: -60,
       y: 20,
-      z: 0,
+      z: -20,
       size: 8,
       color: '#60a5fa',
       monthly_payment: 545,
@@ -87,7 +87,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota Prius',
       x: 65,
       y: 15,
-      z: 0,
+      z: 35,
       size: 9,
       color: '#4ade80',
       monthly_payment: 360,
@@ -100,7 +100,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota 4Runner',
       x: 0,
       y: -60,
-      z: 0,
+      z: -40,
       size: 7,
       color: '#60a5fa',
       monthly_payment: 595,
@@ -113,7 +113,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota Tacoma',
       x: -25,
       y: 55,
-      z: 0,
+      z: 20,
       size: 7,
       color: '#60a5fa',
       monthly_payment: 515,
@@ -126,7 +126,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
       vehicle: 'Toyota Tundra',
       x: 40,
       y: -50,
-      z: 0,
+      z: -15,
       size: 6,
       color: '#fbbf24',
       monthly_payment: 675,
@@ -192,7 +192,7 @@ export const FinancialDashboard = () => {
 
       {/* Right Panel - Constellation View */}
       <div className="dashboard-panel constellation-side">
-        <Constellation3D stars={stars} />
+        <Constellation3D stars={stars} userConfig={config} />
         
         {/* Floating Stats */}
         <div className="floating-stats">
