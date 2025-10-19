@@ -2,7 +2,7 @@
 
 **Tachyon** is an AI-powered financial advisor for Toyota vehicle financing. It guides users through a multi-turn conversational interview and visualizes personalized financing and leasing options as an interactive 3D "financial constellation".
 
-## ✨ Features
+## Features
 
 * **AI-Powered Interview:** Conducts a conversational interview to gather detailed user data on financial status, vehicle needs, and lifestyle preferences.
 * **Multi-Agent Orchestration:** Uses a Google Agent Development Kit (ADK) root agent to coordinate three specialized sub-agents (Interviewer, Reviewer, Node Maker) to ensure a complete profile and generate accurate scenarios.
@@ -10,7 +10,7 @@
 * **Scenario Deep-Dive:** Allows users to "expand" a scenario node, triggering the Node Maker agent to generate up to 10 levels of branching options (e.g., different payment structures, trim levels, add-ons, or alternative vehicles).
 * **Secure Authentication:** Integrates Google OAuth for user sign-in and session management.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology | Description |
 | :--- | :--- | :--- |
@@ -20,7 +20,7 @@
 | **Frontend** | React, TypeScript, Vite | Modern frontend framework and build tool. |
 | **Visualization** | React-Three-Fiber, Three.js | Used for rendering the interactive 3D Financial Constellation. |
 
-## 📐 AI Architecture (Agent Workflow)
+## AI Architecture (Agent Workflow)
 
 The core logic is driven by an AI multi-agent system orchestrated by the `root_agent`:
 
