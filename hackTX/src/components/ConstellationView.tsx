@@ -2,18 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stars, Text } from '@react-three/drei'
 import { useRef, useState } from 'react'
 import * as THREE from 'three'
-
-interface VehicleStar {
-  id: number
-  vehicle: string
-  x: number
-  y: number
-  z: number
-  size: number
-  color: string
-  monthly_payment: number
-  affordability: string
-}
+import type { VehicleStar } from '../types'
 
 interface ConstellationProps {
   stars: VehicleStar[]

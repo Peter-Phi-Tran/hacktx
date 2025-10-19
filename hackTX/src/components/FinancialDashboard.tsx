@@ -1,30 +1,10 @@
 import { useState } from 'react'
 import { Constellation3D } from './Constellation3D'
 import { ConfigPanel } from './ConfigPanel'
+import type { FinancialConfig, VehicleStar } from '../types'
 
-interface FinancialConfig {
-  income: number
-  creditScore: string
-  downPayment: number
-  monthlyBudget: number
-  loanTerm: number
-  vehicleTypes: string[]
-  priorities: string[]
-  additionalContext: string
-}
-
-interface VehicleStar {
-  id: number
-  vehicle: string
-  x: number
-  y: number
-  z: number
-  size: number
-  color: string
-  monthly_payment: number
-  affordability: string
-  price_range?: string
-  why?: string
+interface FinancialDashboardProps {
+  onLogout?: () => void
 }
 
 // Generate mock stars based on config with varied 3D positioning
@@ -159,7 +139,7 @@ const generateStars = (config: FinancialConfig): VehicleStar[] => {
   }).filter(star => star.monthly_payment <= config.monthlyBudget * 1.2)
 }
 
-export const FinancialDashboard = () => {
+export const FinancialDashboard = ({ onLogout }: FinancialDashboardProps = {}) => {
   const [config, setConfig] = useState<FinancialConfig>({
     income: 5000,
     creditScore: '670-739',
@@ -187,6 +167,7 @@ export const FinancialDashboard = () => {
           config={config} 
           setConfig={setConfig} 
           onAnalyze={handleAnalyze}
+          onLogout={onLogout}
         />
       </div>
 

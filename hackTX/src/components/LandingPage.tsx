@@ -1,15 +1,24 @@
 import { StarField } from './StarField'
 import { NebulaBg } from './NebulaBg'
 
+interface LandingPageProps {
+  onLogin: () => void
+}
+
 /**
  * Consolidated Landing Page Component
  * All landing page UI elements are contained here for simplicity
  */
-export const LandingPage = () => {
+export const LandingPage = ({ onLogin }: LandingPageProps) => {
   const handleSignIn = () => {
-    const raw = (import.meta.env.VITE_BACKEND_URL as string) || "http://localhost:5000"
-    const backend = raw.replace(/\/+$/, "")
-    window.location.href = `${backend}/auth/google`
+    // For testing: just call onLogin to simulate authentication
+    // In production, this would redirect to Google OAuth
+    onLogin()
+    
+    // Production code (commented out for testing):
+    // const raw = (import.meta.env.VITE_BACKEND_URL as string) || "http://localhost:5000"
+    // const backend = raw.replace(/\/+$/, "")
+    // window.location.href = `${backend}/auth/google`
   }
 
   return (
