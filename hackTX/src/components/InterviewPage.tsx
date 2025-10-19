@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import TranscriptPanel from "./TranscriptPanel";
-import "./InterviewPage.css";
 
 export interface TranscriptTurn {
   sender: "agent" | "user";
