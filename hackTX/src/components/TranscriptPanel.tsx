@@ -1,4 +1,3 @@
-import React from "react";
 import type { TranscriptTurn } from "./InterviewPage";
 
 interface TranscriptPanelProps {
@@ -25,8 +24,12 @@ function MessageBubble({ turn }: { turn: TranscriptTurn }) {
   return (
     <div className={`message-row ${isAgent ? "agent-row" : "user-row"}`}>
       {isAgent && <Avatar type="agent" />}
-      
-      <div className={`chat-bubble-widget ${isAgent ? "agent-widget" : "user-widget"}`}>
+
+      <div
+        className={`chat-bubble-widget ${
+          isAgent ? "agent-widget" : "user-widget"
+        }`}
+      >
         <div className="bubble-header">
           <span className="bubble-username">{turn.username}</span>
           <span className="bubble-meta-widget">{turn.time}</span>
@@ -42,7 +45,11 @@ function MessageBubble({ turn }: { turn: TranscriptTurn }) {
 function Avatar({ type }: { type: "agent" | "user" }) {
   return (
     <div className={`avatar ${type}-avatar`}>
-      {type === "agent" ? <span className="star-icon">⭐</span> : <span>👤</span>}
+      {type === "agent" ? (
+        <span className="star-icon">⭐</span>
+      ) : (
+        <span>👤</span>
+      )}
     </div>
   );
 }

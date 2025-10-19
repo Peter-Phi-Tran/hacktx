@@ -1,183 +1,106 @@
-import React from 'react'
-import type { FinancialConfig } from '../types'
+import React from "react";
+import type { FinancialConfig } from "../types";
 
 interface ConfigPanelProps {
-  config: FinancialConfig
-  setConfig: (config: FinancialConfig | ((prev: FinancialConfig) => FinancialConfig)) => void
-  onAnalyze?: () => void
-  onLogout?: () => void
+  config: FinancialConfig;
+  setConfig: (
+    config: FinancialConfig | ((prev: FinancialConfig) => FinancialConfig)
+  ) => void;
+  onLogout?: () => void;
 }
 
 const vehicleTypeOptions = [
-  { id: 'sedan', label: 'Sedan', description: 'Fuel-efficient and practical' },
-  { id: 'suv', label: 'SUV', description: 'Spacious with cargo room' },
-  { id: 'truck', label: 'Truck', description: 'Hauling and towing capacity' },
-  { id: 'hybrid', label: 'Hybrid', description: 'Eco-friendly option' },
-  { id: 'electric', label: 'Electric', description: 'Zero emissions' },
-  { id: 'crossover', label: 'Crossover', description: 'Blend of sedan and SUV' }
-]
+  { id: "sedan", label: "Sedan" },
+  { id: "suv", label: "SUV" },
+  { id: "truck", label: "Truck" },
+  { id: "hybrid", label: "Hybrid" },
+];
 
-const priorityOptions = [
-  { id: 'safety', label: 'Safety', icon: ''},
-  { id: 'fuel_efficiency', label: 'Fuel Efficiency', icon: ''},
-  { id: 'cargo_space', label: 'Cargo Space', icon: ''},
-  { id: 'towing', label: 'Towing', icon: ''},
-  { id: 'technology', label: 'Technology', icon: ''},
-  { id: 'reliability', label: 'Reliability', icon: ''},
-  { id: 'resale_value', label: 'Resale Value', icon: ''},
-  { id: 'comfort', label: 'Comfort', icon: ''}
-]
-
-const creditScoreRanges = [
-  { value: '300-579', label: 'Poor (300-579)' },
-  { value: '580-669', label: 'Fair (580-669)' },
-  { value: '670-739', label: 'Good (670-739)' },
-  { value: '740-799', label: 'Very Good (740-799)' },
-  { value: '800-850', label: 'Excellent (800-850)' }
-]
-
-const loanTermOptions = [36, 48, 60, 72]
+const loanTermOptions = [36, 48, 60, 72];
 
 export const ConfigPanel: React.FC<ConfigPanelProps> = ({
   config,
   setConfig,
-  onAnalyze,
-  onLogout
+  onLogout,
 }) => {
   const handleVehicleTypeToggle = (typeId: string) => {
     setConfig((prev) => ({
       ...prev,
       vehicleTypes: prev.vehicleTypes.includes(typeId)
         ? prev.vehicleTypes.filter((id) => id !== typeId)
-        : [...prev.vehicleTypes, typeId]
-    }))
-  }
-
-  const handlePriorityToggle = (priorityId: string) => {
-    setConfig((prev) => ({
-      ...prev,
-      priorities: prev.priorities.includes(priorityId)
-        ? prev.priorities.filter((id) => id !== priorityId)
-        : [...prev.priorities, priorityId]
-    }))
-  }
+        : [...prev.vehicleTypes, typeId],
+    }));
+  };
 
   return (
     <div className="config-panel">
       {/* Header */}
       <div className="config-header">
-        <h1 className="config-title">Financial Constellation Console</h1>
-        <p className="config-subtitle">Configure your financing journey</p>
+        <h1 className="config-title">Constellation View</h1>
+        <p className="config-subtitle">Explore your financing options</p>
+      </div>
+
+      {/* Quick Stats Display */}
+      <div className="stats-display">
+        <div className="stat-item">
+          <span className="stat-label">Monthly Budget</span>
+          <span className="stat-value">${config.monthlyBudget}/mo</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Down Payment</span>
+          <span className="stat-value">
+            ${config.downPayment.toLocaleString()}
+          </span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Credit Score</span>
+          <span className="stat-value">
+            {config.creditScore.split("-")[0]}-
+            {config.creditScore.split("-")[1]}
+          </span>
+        </div>
       </div>
 
       {/* Controls Guide */}
       <div className="controls-section">
-        <h2 className="section-title">Constellation Controls</h2>
+        <h2 className="section-title">🎮 Controls</h2>
         <div className="controls-list">
           <div className="control-item">
             <kbd className="kbd">Click</kbd>
-            <span>View vehicle details</span>
+            <span>View details & expand</span>
           </div>
           <div className="control-item">
-            <kbd className="kbd">Hover</kbd>
-            <span>Quick preview</span>
+            <kbd className="kbd">Drag</kbd>
+            <span>Rotate view</span>
           </div>
           <div className="control-item">
             <kbd className="kbd">Scroll</kbd>
-            <span>Zoom constellation</span>
+            <span>Zoom in/out</span>
           </div>
         </div>
       </div>
 
-      {/* Financial Parameters */}
+      {/* Simplified Filters */}
       <div className="section-card">
-        <h2 className="section-title">Financial Profile</h2>
-
-        {/* Monthly Income */}
-        <div className="param-control">
-          <div className="param-header">
-            <label htmlFor="income">Monthly Income</label>
-            <span className="param-value">${config.income.toLocaleString()}</span>
-          </div>
-          <input
-            id="income"
-            type="range"
-            min="2000"
-            max="15000"
-            step="100"
-            value={config.income}
-            onChange={(e) =>
-              setConfig((prev) => ({
-                ...prev,
-                income: parseInt(e.target.value)
-              }))
-            }
-            className="range-slider"
-          />
-        </div>
-
-        {/* Credit Score */}
-        <div className="param-control">
-          <label htmlFor="creditScore">Credit Score Range</label>
-          <select
-            id="creditScore"
-            value={config.creditScore}
-            onChange={(e) =>
-              setConfig((prev) => ({
-                ...prev,
-                creditScore: e.target.value
-              }))
-            }
-            className="select-input"
-          >
-            {creditScoreRanges.map((range) => (
-              <option key={range.value} value={range.value}>
-                {range.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Down Payment */}
-        <div className="param-control">
-          <div className="param-header">
-            <label htmlFor="downPayment">Down Payment</label>
-            <span className="param-value">${config.downPayment.toLocaleString()}</span>
-          </div>
-          <input
-            id="downPayment"
-            type="range"
-            min="0"
-            max="20000"
-            step="500"
-            value={config.downPayment}
-            onChange={(e) =>
-              setConfig((prev) => ({
-                ...prev,
-                downPayment: parseInt(e.target.value)
-              }))
-            }
-            className="range-slider"
-          />
-        </div>
+        <h2 className="section-title">💰 Budget Settings</h2>
 
         {/* Monthly Budget */}
         <div className="param-control">
           <div className="param-header">
-            <label htmlFor="monthlyBudget">Monthly Payment Budget</label>
-            <span className="param-value">${config.monthlyBudget.toLocaleString()}</span>
+            <label htmlFor="monthlyBudget">Target Payment</label>
+            <span className="param-value">${config.monthlyBudget}/mo</span>
           </div>
           <input
             id="monthlyBudget"
             type="range"
             min="200"
-            max="1000"
-            step="25"
+            max="2000"
+            step="50"
             value={config.monthlyBudget}
             onChange={(e) =>
               setConfig((prev) => ({
                 ...prev,
-                monthlyBudget: parseInt(e.target.value)
+                monthlyBudget: parseInt(e.target.value),
               }))
             }
             className="range-slider"
@@ -186,107 +109,51 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
 
         {/* Loan Term */}
         <div className="param-control">
-          <label>Loan Term</label>
-          <div className="loan-term-buttons">
+          <label htmlFor="loanTerm">Loan Term</label>
+          <select
+            id="loanTerm"
+            value={config.loanTerm}
+            onChange={(e) =>
+              setConfig((prev) => ({
+                ...prev,
+                loanTerm: parseInt(e.target.value),
+              }))
+            }
+            className="select-input"
+          >
             {loanTermOptions.map((term) => (
-              <button
-                key={term}
-                onClick={() =>
-                  setConfig((prev) => ({
-                    ...prev,
-                    loanTerm: term
-                  }))
-                }
-                className={`term-button ${config.loanTerm === term ? 'active' : ''}`}
-              >
-                {term} mo
-              </button>
+              <option key={term} value={term}>
+                {term} months ({Math.floor(term / 12)} years)
+              </option>
             ))}
-          </div>
+          </select>
         </div>
       </div>
 
-      {/* Vehicle Type Toggles */}
+      {/* Simplified Vehicle Types */}
       <div className="section-card">
-        <h2 className="section-title">Vehicle Types</h2>
-        <div className="toggle-grid">
-          {vehicleTypeOptions.map((type) => (
+        <h2 className="section-title">🚗 Vehicle Types</h2>
+        <div className="vehicle-types-grid">
+          {vehicleTypeOptions.slice(0, 4).map((type) => (
             <button
               key={type.id}
               onClick={() => handleVehicleTypeToggle(type.id)}
-              className={`toggle-button ${
-                config.vehicleTypes.includes(type.id) ? 'active' : ''
+              className={`vehicle-type-btn ${
+                config.vehicleTypes.includes(type.id) ? "active" : ""
               }`}
-              title={type.description}
             >
               {type.label}
             </button>
           ))}
         </div>
-        {config.vehicleTypes.length > 0 && (
-          <div className="selection-count">
-            Selected: {config.vehicleTypes.length} type{config.vehicleTypes.length !== 1 ? 's' : ''}
-          </div>
-        )}
       </div>
-
-      {/* Priority Toggles */}
-      <div className="section-card">
-        <h2 className="section-title">Priorities</h2>
-        <div className="toggle-grid">
-          {priorityOptions.map((priority) => (
-            <button
-              key={priority.id}
-              onClick={() => handlePriorityToggle(priority.id)}
-              className={`toggle-button priority ${
-                config.priorities.includes(priority.id) ? 'active' : ''
-              }`}
-            >
-              <span className="priority-icon">{priority.icon}</span>
-              {priority.label}
-            </button>
-          ))}
-        </div>
-        {config.priorities.length > 0 && (
-          <div className="selection-count">
-            Selected: {config.priorities.length} priorit{config.priorities.length !== 1 ? 'ies' : 'y'}
-          </div>
-        )}
-      </div>
-
-      {/* Additional Context */}
-      <div className="section-card">
-        <label htmlFor="context" className="section-title">
-          Additional Context
-        </label>
-        <textarea
-          id="context"
-          placeholder="e.g., 'Need reliable winter performance' or 'Planning to start a family'"
-          value={config.additionalContext}
-          onChange={(e) =>
-            setConfig((prev) => ({
-              ...prev,
-              additionalContext: e.target.value
-            }))
-          }
-          className="text-input"
-          rows={3}
-        />
-      </div>
-
-      {/* Analyze Button */}
-      {onAnalyze && (
-        <button onClick={onAnalyze} className="analyze-button">
-            Regenerate Constellation
-        </button>
-      )}
 
       {/* Logout Button */}
       {onLogout && (
-        <button onClick={onLogout} className="logout-button">
-          Logout
+        <button onClick={onLogout} className="logout-btn">
+          Sign Out
         </button>
       )}
     </div>
-  )
-}
+  );
+};

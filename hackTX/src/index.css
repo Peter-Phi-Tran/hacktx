@@ -68,27 +68,28 @@ body {
   width: 120%;
   height: 120%;
   background: radial-gradient(
-    circle at 30% 50%,
-    rgba(138, 43, 226, 0.15) 0%,
-    transparent 50%
-  ),
-  radial-gradient(
-    circle at 70% 50%,
-    rgba(65, 105, 225, 0.15) 0%,
-    transparent 50%
-  ),
-  radial-gradient(
-    circle at 50% 70%,
-    rgba(147, 51, 234, 0.1) 0%,
-    transparent 60%
-  );
+      circle at 30% 50%,
+      rgba(138, 43, 226, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 70% 50%,
+      rgba(65, 105, 225, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 70%,
+      rgba(147, 51, 234, 0.1) 0%,
+      transparent 60%
+    );
   filter: blur(60px);
   z-index: 2;
   animation: nebula-drift 20s ease-in-out infinite;
 }
 
 @keyframes nebula-drift {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, -50%) scale(1);
   }
   50% {
@@ -155,15 +156,14 @@ body {
   height: 40px;
   background: radial-gradient(circle, #ffffff 0%, #93c5fd 50%, transparent 70%);
   border-radius: 50%;
-  box-shadow: 
-    0 0 20px rgba(147, 197, 253, 0.8),
-    0 0 40px rgba(147, 197, 253, 0.4),
-    0 0 60px rgba(147, 197, 253, 0.2);
+  box-shadow: 0 0 20px rgba(147, 197, 253, 0.8),
+    0 0 40px rgba(147, 197, 253, 0.4), 0 0 60px rgba(147, 197, 253, 0.2);
   animation: star-pulse 3s ease-in-out infinite;
 }
 
 @keyframes star-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
@@ -187,13 +187,13 @@ body {
 .title-main {
   font-size: 5.5rem;
   font-weight: 900;
-  font-family: 'Orbitron', 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-family: "Orbitron", "Montserrat", "Segoe UI", Arial, sans-serif;
   background: linear-gradient(135deg, #fff 0%, #93c5fd 50%, #c4b5fd 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 0.1em; 
-  text-shadow: 0 0 80px rgba(147, 197, 253, 0.5), 0 2px 8px rgba(0,0,0,0.12);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 80px rgba(147, 197, 253, 0.5), 0 2px 8px rgba(0, 0, 0, 0.12);
   animation: title-glow 3s ease-in-out infinite;
   line-height: 1.2;
   margin-bottom: 1.2rem;
@@ -202,7 +202,8 @@ body {
 }
 
 @keyframes title-glow {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 20px rgba(147, 197, 253, 0.5));
   }
   50% {
@@ -242,22 +243,25 @@ body {
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(147, 197, 253, 0.2),
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 0 20px rgba(147, 197, 253, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   position: relative;
   overflow: hidden;
 }
 
 .google-login-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(147, 197, 253, 0.3), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(147, 197, 253, 0.3),
+    transparent
+  );
   transition: left 0.5s;
 }
 
@@ -267,18 +271,14 @@ body {
 
 .google-login-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 
-    0 10px 20px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(147, 197, 253, 0.4),
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 40px rgba(147, 197, 253, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   border-color: rgba(147, 197, 253, 0.5);
 }
 
 .google-login-btn:active {
   transform: translateY(-1px);
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(147, 197, 253, 0.2),
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 0 20px rgba(147, 197, 253, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
@@ -452,28 +452,29 @@ body {
 
 .vehicle-details {
   position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 75%;
-  max-width: 380px;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  width: 380px;
+  max-width: 90vw;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(147, 197, 253, 0.3);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease-out;
+  animation: slideInRight 0.3s ease-out;
+  z-index: 100;
 }
 
-@keyframes slideUp {
+@keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(20px);
+    transform: translateY(-50%) translateX(20px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(-50%) translateX(0);
   }
 }
 
@@ -633,6 +634,39 @@ body {
   font-size: 0.875rem;
   color: #94a3b8;
   margin: 0.25rem 0 0 0;
+}
+
+.stats-display {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: rgba(96, 165, 250, 0.08);
+  border-radius: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #60a5fa;
 }
 
 .controls-section {
@@ -838,6 +872,56 @@ body {
   margin-top: 0.25rem;
 }
 
+.vehicle-types-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.vehicle-type-btn {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vehicle-type-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.vehicle-type-btn.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #60a5fa;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fee2e2;
+}
+
 .text-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
@@ -1023,7 +1107,7 @@ body {
   .title-main {
     font-size: 3.5rem;
   }
-  
+
   .title-subtitle {
     font-size: 0.9rem;
   }
@@ -1031,7 +1115,7 @@ body {
   .tagline {
     font-size: 1rem;
   }
-  
+
   .google-login-btn {
     padding: 14px 32px;
     font-size: 1rem;
@@ -1046,12 +1130,14 @@ body {
   }
 
   .vehicle-details {
-    width: 95%;
-    padding: 20px;
+    right: 10px;
+    width: 320px;
+    max-width: calc(100vw - 20px);
+    padding: 16px;
   }
 
   .details-header h2 {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .constellation-legend {
@@ -1092,6 +1178,26 @@ body {
   .features {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .vehicle-details {
+    top: auto;
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    width: calc(100vw - 40px);
+    animation: slideInUp 0.3s ease-out;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateX(50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(50%) translateY(0);
+    }
   }
 }
 
@@ -1216,7 +1322,8 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -1303,24 +1410,13 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(circle, white 1px, transparent 1px),
+  background-image: radial-gradient(circle, white 1px, transparent 1px),
     radial-gradient(circle, white 1px, transparent 1px),
     radial-gradient(circle, white 2px, transparent 2px),
     radial-gradient(circle, white 1px, transparent 1px),
     radial-gradient(circle, white 1px, transparent 1px);
-  background-size: 
-    550px 550px,
-    350px 350px,
-    250px 250px,
-    150px 150px,
-    80px 80px;
-  background-position: 
-    0 0,
-    40px 60px,
-    130px 270px,
-    70px 100px,
-    0 0;
+  background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px, 80px 80px;
+  background-position: 0 0, 40px 60px, 130px 270px, 70px 100px, 0 0;
   opacity: 0.4;
   animation: moveStars 120s linear infinite;
   pointer-events: none;
@@ -1333,15 +1429,14 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 1px),
+  background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.8) 1px,
+      transparent 1px
+    ),
     radial-gradient(circle, rgba(255, 255, 255, 0.6) 2px, transparent 2px);
-  background-size: 
-    200px 200px,
-    400px 400px;
-  background-position: 
-    50px 50px,
-    0 0;
+  background-size: 200px 200px, 400px 400px;
+  background-position: 50px 50px, 0 0;
   opacity: 0.3;
   animation: twinkle 4s ease-in-out infinite alternate;
   pointer-events: none;
@@ -1585,6 +1680,26 @@ body {
   background: #b3baff;
 }
 
+.chat-logout-btn {
+  padding: 14px 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.chat-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fee2e2;
+}
+
 /* Empty chat */
 .empty-chat {
   color: #aaa;
@@ -1592,4 +1707,3 @@ body {
   margin-top: 60px;
   font-size: 1.1rem;
 }
-

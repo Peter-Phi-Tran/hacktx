@@ -23,7 +23,7 @@ Always maintain a professional, helpful tone and ensure the user gets personaliz
 """
 
 root_agent = Agent(
-	model='gemini-2.5-flash',
+	model='gemini-2.0-flash',
 	name='root_agent',
 	description="Root orchestrator for the Toyota financing multi-agent system.",
 	instruction=ROOT_INSTRUCTION,

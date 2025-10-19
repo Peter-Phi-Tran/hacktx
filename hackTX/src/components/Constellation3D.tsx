@@ -10,7 +10,6 @@ import {
   type VehicleStar,
   type FinancingScenario,
 } from "../hooks/useConstellation";
-import { generateFinancingScenarios } from "../utils/financing";
 import { VehicleSphere } from "./VehicleSphere";
 import { UserNode } from "./UserNode";
 import type { UserConfig } from "../types";
@@ -40,8 +39,7 @@ export const Constellation3D = ({
     setIsHoveringUser,
   } = useConstellationSelection();
 
-  const { financingScenarios, expandedStarId, addScenarios } =
-    useFinancingScenarios();
+  const { financingScenarios } = useFinancingScenarios();
 
   const { cameraTarget, controlsRef, focusOnNode } = useCameraControls();
 
@@ -66,6 +64,7 @@ export const Constellation3D = ({
   // Handle node selection and update camera focus
   const handleStarClick = (star: VehicleStar) => {
     setSelectedStar(star);
+    // Focus camera on the node - center it in view
     focusOnNode(star.x / 15, star.y / 15, star.z / 15);
     // Trigger external callback if provided (for modal popup)
     if (onStarClick) {
@@ -81,18 +80,6 @@ export const Constellation3D = ({
   const handleUserNodeClick = () => {
     setShowUserInfo(!showUserInfo);
     focusOnNode(0, 0, 0);
-  };
-
-  // Handle exploring financing options
-  const handleExploreFinancing = () => {
-    if (selectedStar && !selectedStar.parentId) {
-      const scenarios = generateFinancingScenarios(
-        selectedStar,
-        selectedStar.id
-      );
-      addScenarios(scenarios, selectedStar.id);
-      setSelectedStar(null); // Close the details panel
-    }
   };
 
   return (
@@ -153,15 +140,99 @@ export const Constellation3D = ({
 
         {/* Vehicle stars */}
         {stars.map((star) => (
-          <VehicleSphere
-            key={star.id}
-            star={star}
-            isSelected={selectedStar?.id === star.id}
-            isHovered={hoveredStar?.id === star.id}
-            onClick={() => handleStarClick(star)}
-            onPointerOver={() => setHoveredStar(star)}
-            onPointerOut={() => setHoveredStar(null)}
-          />
+          <group key={`star-group-${star.id}`}>
+            {/* Connection line from parent to child OR from center to first-level nodes */}
+            {(() => {
+              if (star.parentId) {
+                // Child node - connect to parent
+                const parentStar = stars.find((s) => s.id === star.parentId);
+                return parentStar ? (
+                  <line>
+                    <bufferGeometry>
+                      <bufferAttribute
+                        attach="attributes-position"
+                        count={2}
+                        array={
+                          new Float32Array([
+                            parentStar.x / 15,
+                            parentStar.y / 15,
+                            parentStar.z / 15,
+                            star.x / 15,
+                            star.y / 15,
+                            star.z / 15,
+                          ])
+                        }
+                        itemSize={3}
+                        args={[
+                          new Float32Array([
+                            parentStar.x / 15,
+                            parentStar.y / 15,
+                            parentStar.z / 15,
+                            star.x / 15,
+                            star.y / 15,
+                            star.z / 15,
+                          ]),
+                          3,
+                        ]}
+                      />
+                    </bufferGeometry>
+                    <lineBasicMaterial
+                      color={star.color}
+                      opacity={0.2}
+                      transparent
+                      linewidth={1}
+                    />
+                  </line>
+                ) : null;
+              } else {
+                // First-level node (no parent) - connect to center (0,0,0)
+                return (
+                  <line>
+                    <bufferGeometry>
+                      <bufferAttribute
+                        attach="attributes-position"
+                        count={2}
+                        array={
+                          new Float32Array([
+                            0, 0, 0, // Center node position
+                            star.x / 15,
+                            star.y / 15,
+                            star.z / 15,
+                          ])
+                        }
+                        itemSize={3}
+                        args={[
+                          new Float32Array([
+                            0, 0, 0, // Center node position
+                            star.x / 15,
+                            star.y / 15,
+                            star.z / 15,
+                          ]),
+                          3,
+                        ]}
+                      />
+                    </bufferGeometry>
+                    <lineBasicMaterial
+                      color={star.color}
+                      opacity={0.15}
+                      transparent
+                      linewidth={1}
+                    />
+                  </line>
+                );
+              }
+            })()}
+            
+            {/* Star sphere */}
+            <VehicleSphere
+              star={star}
+              isSelected={selectedStar?.id === star.id}
+              isHovered={hoveredStar?.id === star.id}
+              onClick={() => handleStarClick(star)}
+              onPointerOver={() => setHoveredStar(star)}
+              onPointerOut={() => setHoveredStar(null)}
+            />
+          </group>
         ))}
 
         {/* Financing scenario child nodes */}
@@ -202,9 +273,9 @@ export const Constellation3D = ({
                   </bufferGeometry>
                   <lineBasicMaterial
                     color={scenario.color}
-                    opacity={0.6}
+                    opacity={0.2}
                     transparent
-                    linewidth={2}
+                    linewidth={1}
                   />
                 </line>
               )}
@@ -238,206 +309,6 @@ export const Constellation3D = ({
           <span>Larger = Better Match</span>
         </div>
       </div>
-
-      {/* User Info Panel */}
-      {showUserInfo && (
-        <div className="vehicle-details">
-          <div className="details-header">
-            <h2>Your Financial Profile</h2>
-            <button
-              className="close-btn"
-              onClick={() => setShowUserInfo(false)}
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="details-body">
-            <div className="detail-row">
-              <span className="label">Monthly Income:</span>
-              <span className="value">
-                ${userConfig.income.toLocaleString()}
-              </span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Credit Score:</span>
-              <span className="value">{userConfig.creditScore}</span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Down Payment:</span>
-              <span className="value">
-                ${userConfig.downPayment.toLocaleString()}
-              </span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Monthly Budget:</span>
-              <span className="value">${userConfig.monthlyBudget}</span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Loan Term:</span>
-              <span className="value">{userConfig.loanTerm} months</span>
-            </div>
-          </div>
-
-          <button
-            className="explore-btn"
-            onClick={() => setShowUserInfo(false)}
-          >
-            Explore Vehicle Options →
-          </button>
-        </div>
-      )}
-
-      {/* Vehicle Details Panel */}
-      {selectedStar && !showUserInfo && !selectedScenario && (
-        <div className="vehicle-details">
-          <div className="details-header">
-            <h2>{selectedStar.vehicle}</h2>
-            <button className="close-btn" onClick={() => setSelectedStar(null)}>
-              ✕
-            </button>
-          </div>
-
-          <div className="details-body">
-            <div className="detail-row">
-              <span className="label">Monthly Payment:</span>
-              <span className="value">${selectedStar.monthly_payment}</span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Affordability:</span>
-              <span
-                className="value affordability-badge"
-                style={{
-                  background:
-                    selectedStar.affordability === "excellent"
-                      ? "#4ade8033"
-                      : selectedStar.affordability === "good"
-                      ? "#60a5fa33"
-                      : "#fbbf2433",
-                  color:
-                    selectedStar.affordability === "excellent"
-                      ? "#4ade80"
-                      : selectedStar.affordability === "good"
-                      ? "#60a5fa"
-                      : "#fbbf24",
-                }}
-              >
-                {selectedStar.affordability.charAt(0).toUpperCase() +
-                  selectedStar.affordability.slice(1)}
-              </span>
-            </div>
-
-            {selectedStar.price_range && (
-              <div className="detail-row">
-                <span className="label">Price Range:</span>
-                <span className="value">{selectedStar.price_range}</span>
-              </div>
-            )}
-
-            {selectedStar.why && (
-              <div className="detail-row">
-                <span className="label">Why This Vehicle:</span>
-                <p className="why-text">{selectedStar.why}</p>
-              </div>
-            )}
-          </div>
-
-          <button
-            className="explore-btn"
-            onClick={handleExploreFinancing}
-            disabled={expandedStarId === selectedStar.id}
-          >
-            {expandedStarId === selectedStar.id
-              ? "✓ Scenarios Generated"
-              : "Explore Financing Options →"}
-          </button>
-        </div>
-      )}
-
-      {/* Scenario Details Panel */}
-      {selectedScenario && (
-        <div className="vehicle-details">
-          <div className="details-header">
-            <h2>{selectedScenario.scenarioName}</h2>
-            <button
-              className="close-btn"
-              onClick={() => setSelectedScenario(null)}
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="details-body">
-            <div className="detail-row">
-              <span className="label">Down Payment:</span>
-              <span className="value">
-                ${selectedScenario.details.downPayment.toFixed(0)}
-              </span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Monthly Payment:</span>
-              <span className="value">${selectedScenario.monthly_payment}</span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Loan Term:</span>
-              <span className="value">
-                {selectedScenario.details.loanTerm} months
-              </span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Interest Rate:</span>
-              <span className="value">
-                {selectedScenario.details.interestRate}%
-              </span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Total Cost:</span>
-              <span className="value">
-                ${selectedScenario.details.totalCost.toFixed(0)}
-              </span>
-            </div>
-
-            <div className="detail-row">
-              <span className="label">Comparison:</span>
-              <span
-                className="value"
-                style={{
-                  color:
-                    selectedScenario.details.savingsVsBase >= 0
-                      ? "#4ade80"
-                      : "#fbbf24",
-                }}
-              >
-                {selectedScenario.details.savingsVsBase >= 0 ? "Save" : "Cost"}{" "}
-                ${Math.abs(selectedScenario.details.savingsVsBase).toFixed(0)}
-              </span>
-            </div>
-
-            <div
-              style={{
-                marginTop: "1rem",
-                padding: "0.75rem",
-                background: "rgba(59, 130, 246, 0.1)",
-                borderRadius: "8px",
-                borderLeft: "3px solid #3b82f6",
-              }}
-            >
-              <p style={{ fontSize: "0.875rem", color: "#e0e7ff", margin: 0 }}>
-                {selectedScenario.outcome}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Camera controls hint */}
       <div

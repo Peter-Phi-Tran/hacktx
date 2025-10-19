@@ -146,6 +146,11 @@ export default function InterviewPage() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    window.location.href = "/";
+  };
+
   // If we have scenarios and should show results, display constellation
   if (showResults && scenarios.length > 0) {
     return <InterviewResultsView scenarios={scenarios} />;
@@ -197,6 +202,13 @@ export default function InterviewPage() {
             disabled={isLoading || isComplete || !sessionId || !input.trim()}
           >
             {isLoading ? "..." : "Send"}
+          </button>
+          <button
+            className="chat-logout-btn"
+            type="button"
+            onClick={handleLogout}
+          >
+            Sign Out
           </button>
         </form>
       </div>

@@ -5,7 +5,7 @@ import InterviewPage from "./components/InterviewPage";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [_user, setUser] = useState<{ email: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,26 +78,6 @@ function App() {
     }
   }, []);
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      const backendUrl = (
-        import.meta.env.VITE_API_URL || "http://localhost:8000"
-      ).replace(/\/+$/, "");
-      fetch(`${backendUrl}/auth/logout?token=${token}`, {
-        method: "POST",
-        credentials: "include",
-      }).catch((err) => console.error("Logout error:", err));
-    }
-    localStorage.removeItem("authToken");
-    setIsAuthenticated(false);
-    setUser(null);
-  };
-
   if (isLoading) {
     return (
       <div
@@ -150,11 +130,7 @@ function App() {
     );
   }
 
-  return isAuthenticated ? (
-    <InterviewPage />
-  ) : (
-    <LandingPage onLogin={handleLogin} />
-  );
+  return isAuthenticated ? <InterviewPage /> : <LandingPage />;
 }
 
 export default App;

@@ -1,114 +1,151 @@
 /**
- * Scenario Details Modal - Shows financing scenario details when a star is clicked
+ * Scenario Details Popup - Compact window showing financing scenario metadata
  */
 
+import { useState } from "react";
 import type { VehicleStar } from "../types";
 
 interface ScenarioDetailsModalProps {
   star: VehicleStar | null;
   onClose: () => void;
+  onExpand?: (star: VehicleStar) => Promise<void>;
 }
 
 export function ScenarioDetailsModal({
   star,
   onClose,
+  onExpand,
 }: ScenarioDetailsModalProps) {
+  const [isExpanding, setIsExpanding] = useState(false);
+
   if (!star) return null;
 
+  console.log("ScenarioDetailsModal rendering with star:", star);
+
+  const handleExpand = async () => {
+    if (!onExpand || !star) return;
+
+    setIsExpanding(true);
+    try {
+      await onExpand(star);
+      onClose(); // Close modal after successful expansion
+    } catch (error) {
+      console.error("Error expanding node:", error);
+
+      // Check error type and provide helpful message
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      if (
+        errorMessage.includes("401") ||
+        errorMessage.includes("Unauthorized") ||
+        errorMessage.includes("Invalid or expired token")
+      ) {
+        alert(
+          "🔐 Session Expired\n\nYour login session has expired.\n\nPlease refresh the page and log in again to continue."
+        );
+        // Optionally trigger logout
+        window.location.reload();
+      } else if (
+        errorMessage.includes("429") ||
+        errorMessage.includes("RESOURCE_EXHAUSTED") ||
+        errorMessage.includes("quota")
+      ) {
+        alert(
+          "⚠️ API Quota Exceeded\n\nThe Google Gemini API free tier limit (50 requests/day) has been reached.\n\nPlease:\n1. Wait a few minutes and try again\n2. Or upgrade to a paid API plan\n3. Or use a different API key"
+        );
+      } else {
+        alert(
+          "Failed to expand node. Please try again.\n\nError: " + errorMessage
+        );
+      }
+    } finally {
+      setIsExpanding(false);
+    }
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-
-      {/* Modal */}
-      <div
-        className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+    <div className="vehicle-details">
+      {/* Header */}
+      <div className="details-header">
+        <h2>{star.vehicle}</h2>
+        <button className="close-btn" onClick={onClose}>
+          ×
         </button>
+      </div>
 
-        {/* Header */}
-        <div className="p-6 border-b border-gray-700">
-          <div className="flex items-center gap-3 mb-2">
-            <div
-              className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: star.color }}
-            ></div>
-            <h2 className="text-2xl font-bold text-white">{star.vehicle}</h2>
-          </div>
-          <p className="text-gray-400">
-            {star.affordability.toUpperCase()} Match
-          </p>
+      {/* Body */}
+      <div className="details-body">
+        <div className="detail-row">
+          <span className="label">Monthly Payment</span>
+          <span className="value">
+            ${star.monthly_payment.toLocaleString()}/mo
+          </span>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Price Range */}
-          <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-4">
-            <div className="text-3xl font-bold text-white mb-1">
-              ${star.monthly_payment.toLocaleString()}
-              <span className="text-lg text-gray-400">/mo</span>
-            </div>
-            <div className="text-sm text-gray-300">{star.price_range}</div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-3">Details</h3>
-            <div className="text-gray-300 whitespace-pre-line leading-relaxed">
-              {star.why}
-            </div>
-          </div>
-
-          {/* Scenario Type Badge */}
-          {star.scenarioType && (
-            <div className="flex gap-2">
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  star.scenarioType === "finance"
-                    ? "bg-blue-900/50 text-blue-200 border border-blue-700"
-                    : "bg-green-900/50 text-green-200 border border-green-700"
-                }`}
-              >
-                {star.scenarioType === "finance"
-                  ? "🏦 Financing Plan"
-                  : "📄 Lease Plan"}
-              </span>
-            </div>
-          )}
+        <div className="detail-row">
+          <span className="label">Price Range</span>
+          <span className="value">{star.price_range}</span>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-700 bg-gray-900/50">
-          <button
-            onClick={onClose}
-            className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105"
+        <div className="detail-row">
+          <span className="label">Affordability</span>
+          <span
+            className="affordability-badge"
+            style={{
+              background:
+                star.affordability === "excellent"
+                  ? "rgba(34, 197, 94, 0.2)"
+                  : star.affordability === "good"
+                  ? "rgba(59, 130, 246, 0.2)"
+                  : "rgba(234, 179, 8, 0.2)",
+              color:
+                star.affordability === "excellent"
+                  ? "#86efac"
+                  : star.affordability === "good"
+                  ? "#93c5fd"
+                  : "#fde047",
+            }}
           >
-            Got it!
-          </button>
+            {star.affordability.toUpperCase()}
+          </span>
+        </div>
+
+        {star.scenarioType && (
+          <div className="detail-row">
+            <span className="label">Plan Type</span>
+            <span className="value">
+              {star.scenarioType === "finance" ? "🏦 Financing" : "📄 Lease"}
+            </span>
+          </div>
+        )}
+
+        <div className="detail-row">
+          <span className="label">Why This Vehicle?</span>
+          <p className="why-text">{star.why}</p>
         </div>
       </div>
+
+      {/* Footer */}
+      <button
+        className="explore-btn"
+        onClick={star.isExpanded ? onClose : handleExpand}
+        disabled={isExpanding}
+        style={{
+          background: star.isExpanded
+            ? "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)"
+            : isExpanding
+            ? "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)"
+            : "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+          cursor: isExpanding ? "wait" : "pointer",
+        }}
+      >
+        {isExpanding
+          ? "🔄 Generating..."
+          : star.isExpanded
+          ? "Already Expanded"
+          : "🚗 Let's Go Places"}
+      </button>
     </div>
   );
 }

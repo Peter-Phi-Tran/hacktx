@@ -9,5 +9,10 @@ interface InterviewResultsViewProps {
 }
 
 export function InterviewResultsView({ scenarios }: InterviewResultsViewProps) {
-  return <ConstellationDemo scenarios={scenarios} />;
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    window.location.href = "/";
+  };
+
+  return <ConstellationDemo scenarios={scenarios} onLogout={handleLogout} />;
 }

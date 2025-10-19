@@ -16,6 +16,9 @@ function getAuthHeaders(): HeadersInit {
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+    console.log("🔑 Using auth token:", token.substring(0, 10) + "...");
+  } else {
+    console.warn("⚠️ No auth token found!");
   }
 
   return headers;
@@ -95,5 +98,47 @@ export const interviewAPI = {
     }
 
     return response.json();
+  },
+
+  // Expand a node to generate child scenarios
+  async expandNode(
+    parentScenario: Record<string, unknown>,
+    userProfile: Record<string, unknown>,
+    branchLevel: number = 1
+  ): Promise<{
+    success: boolean;
+    children: Record<string, unknown>[];
+    branch_level: number;
+  }> {
+    console.log("🔧 expandNode API call:", {
+      parentScenario,
+      userProfile,
+      branchLevel,
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/expand-node`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      credentials: "include",
+      body: JSON.stringify({
+        parent_scenario: parentScenario,
+        user_profile: userProfile,
+        branch_level: branchLevel,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ API Error Response:", {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText,
+      });
+      throw new Error(`Failed to expand node: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("✅ API Response Success:", data);
+    return data;
   },
 };

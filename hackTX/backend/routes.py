@@ -312,3 +312,51 @@ async def check_interview_status(
     except Exception as e:
         print(f"Error checking status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/expand-node")
+async def expand_node(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Expand a node by generating 3 child scenarios using node_maker agent
+    Supports multi-level branching with different focuses per level
+    """
+    try:
+        # Verify user is authenticated
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing or invalid authorization token")
+        
+        token = auth_header.replace("Bearer ", "")
+        get_current_user_from_token(token)
+        
+        # Get request body
+        body = await request.json()
+        parent_scenario = body.get("parent_scenario")
+        user_profile = body.get("user_profile")
+        branch_level = body.get("branch_level", 1)  # Default to level 1 if not specified
+        
+        if not parent_scenario or not user_profile:
+            raise HTTPException(status_code=400, detail="Missing parent_scenario or user_profile")
+        
+        # Validate branch level (1-10)
+        if not isinstance(branch_level, int) or branch_level < 1 or branch_level > 10:
+            raise HTTPException(status_code=400, detail="branch_level must be between 1 and 10")
+        
+        # Generate 3 child scenarios using node_maker with specific branch level focus
+        from .interview_service import generate_child_scenarios
+        child_scenarios = generate_child_scenarios(parent_scenario, user_profile, branch_level)
+        
+        return {
+            "success": True,
+            "children": child_scenarios,
+            "branch_level": branch_level
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error expanding node: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

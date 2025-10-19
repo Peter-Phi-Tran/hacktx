@@ -127,7 +127,7 @@ Conversation:
 Your response:"""
         
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=prompt
         )
         
@@ -223,7 +223,7 @@ Your analysis (JSON only):"""
     
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=reviewer_prompt
         )
         reviewer_response = response.text
@@ -283,7 +283,7 @@ Generate 5 scenarios (JSON array only):"""
     
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=node_maker_prompt
         )
         node_maker_response = response.text
@@ -328,3 +328,140 @@ def get_interview_status(db: Session, session_id: str) -> Dict:
         result["scenarios"] = json.loads(session.financing_scenarios)
     
     return result
+
+
+def generate_child_scenarios(parent_scenario: Dict, user_profile: Dict, branch_level: int = 1) -> List[Dict]:
+    """
+    Generate 3 child scenarios branching from a parent scenario using node_maker agent
+    Each level explores a different aspect of the car buying/financing journey
+    
+    Args:
+        parent_scenario: The parent scenario to branch from
+        user_profile: User's financial profile
+        branch_level: The level of branching (1-10, each level has different focus)
+    
+    Returns:
+        List of 3 child scenarios
+    """
+    
+    # Define what each branch level focuses on
+    branch_focus = {
+        1: {
+            "name": "Payment Structures",
+            "instruction": "Generate 3 different PAYMENT STRUCTURE variations:\n- Short-term high payment (36-48 months)\n- Standard mid-term (60 months)\n- Extended low payment (72-84 months)\nFocus on how different loan terms affect monthly payments and total cost."
+        },
+        2: {
+            "name": "Vehicle Trim Levels",
+            "instruction": "Generate 3 different TRIM LEVEL options for the same model:\n- Base/LE trim (budget-friendly)\n- Mid-level/XLE trim (balanced features)\n- Premium/Limited trim (fully loaded)\nShow how trim upgrades affect pricing and value."
+        },
+        3: {
+            "name": "Add-Ons & Packages",
+            "instruction": "Generate 3 scenarios with different WARRANTY AND PACKAGE combinations:\n- Basic coverage only\n- Extended warranty + protection package\n- Premium coverage + maintenance package + GAP insurance\nExplain cost vs. protection trade-offs."
+        },
+        4: {
+            "name": "Insurance Options",
+            "instruction": "Generate 3 different INSURANCE SCENARIOS:\n- Minimum required coverage\n- Recommended full coverage\n- Premium coverage with low deductibles\nInclude estimated insurance costs in monthly budget."
+        },
+        5: {
+            "name": "Maintenance Plans",
+            "instruction": "Generate 3 SERVICE AND MAINTENANCE options:\n- Pay-as-you-go maintenance\n- Prepaid maintenance plan (3 years)\n- Premium ToyotaCare Plus (5 years)\nShow long-term cost savings and convenience."
+        },
+        6: {
+            "name": "Trade-In Scenarios",
+            "instruction": "Generate 3 TRADE-IN options:\n- No trade-in (higher loan amount)\n- Average trade-in value ($5,000-$8,000)\n- High trade-in value ($10,000+)\nShow how trade-in equity reduces financing needs."
+        },
+        7: {
+            "name": "Lease vs. Buy Comparison",
+            "instruction": "Generate 3 OWNERSHIP structure comparisons:\n- Traditional purchase/finance\n- Standard lease (36 months)\n- Lease with purchase option at end\nCompare long-term costs and flexibility."
+        },
+        8: {
+            "name": "Refinancing Options",
+            "instruction": "Generate 3 REFINANCING scenarios (assuming purchase after 2 years):\n- Refinance for lower rate\n- Refinance for shorter term\n- Refinance for lower payment\nShow potential savings and payoff timeline changes."
+        },
+        9: {
+            "name": "Early Payoff Strategies",
+            "instruction": "Generate 3 EARLY PAYMENT scenarios:\n- Extra $50/month toward principal\n- Extra $100/month toward principal\n- Bi-weekly payment strategy\nCalculate interest saved and time reduced."
+        },
+        10: {
+            "name": "Alternative Vehicles",
+            "instruction": "Generate 3 ALTERNATIVE TOYOTA MODELS with similar profiles:\n- Comparable model in different segment\n- Hybrid/electric alternative\n- Certified pre-owned recent model\nCompare value, features, and total cost of ownership."
+        }
+    }
+    
+    # Get the appropriate branch focus (default to level 1 if out of range)
+    focus = branch_focus.get(branch_level, branch_focus[1])
+    
+    node_maker_instruction = f"""
+You are an expert Auto Financing Scenario Generator for Toyota Financial Services.
+
+BRANCH LEVEL {branch_level}: {focus['name']}
+
+{focus['instruction']}
+
+Each scenario object MUST include these fields:
+- "name": Short label (2-4 words), e.g., "Extended Term Plan"
+- "title": 5-10 word description specific to this branch level
+- "description": Concise explanation (2-3 sentences) tailored to the user's profile and branch focus
+- "plan_type": Either "finance" or "lease"
+- "down_payment": Recommended down payment (numeric, in USD)
+- "monthly_payment": Estimated monthly payment (numeric, in USD)
+- "term_months": Total number of months for the plan (numeric)
+- "interest_rate": Annual Percentage Rate (APR) for finance plans, or Money Factor for leases (numeric)
+- "positivity_score": Number between 0-100 indicating how favorable the plan is (higher = better fit)
+- "recommendations": Brief financial tips (1-2 sentences) specific to this branch type
+- "suggested_model": Recommended Toyota model(s) (can vary for level 10 alternatives, otherwise same as parent)
+
+CRITICAL RULES:
+1. Create 3 DISTINCT variations focused on: {focus['name']}
+2. Ensure numeric values are realistic and consistent
+3. Output ONLY valid JSON - no explanations, comments, or additional text
+4. Base variations on the user profile provided
+5. Make scenarios SPECIFIC to level {branch_level} focus area
+
+Output format: JSON array with exactly 3 objects.
+"""
+
+    prompt = f"""{node_maker_instruction}
+
+PARENT SCENARIO:
+{json.dumps(parent_scenario, indent=2)}
+
+USER PROFILE:
+{json.dumps(user_profile, indent=2)}
+
+Generate 3 variations for {focus['name']}:"""
+
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt
+        )
+        node_maker_response = response.text
+    except Exception as e:
+        error_msg = str(e)
+        print(f"Error calling node_maker for expansion (level {branch_level}): {e}")
+        
+        # Provide helpful error messages for common issues
+        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "quota" in error_msg.lower():
+            raise ValueError(f"API quota exceeded. Please wait a few minutes or upgrade your API plan. Original error: {error_msg}")
+        elif "401" in error_msg or "UNAUTHENTICATED" in error_msg:
+            raise ValueError(f"API authentication failed. Please check your API key. Original error: {error_msg}")
+        else:
+            raise ValueError(f"Failed to generate child scenarios: {error_msg}")
+
+    # Parse node_maker response (should be JSON array)
+    try:
+        if "[" in node_maker_response:
+            json_start = node_maker_response.index("[")
+            json_end = node_maker_response.rindex("]") + 1
+            json_str = node_maker_response[json_start:json_end]
+            scenarios = json.loads(json_str)
+        else:
+            raise ValueError("No JSON array found in node_maker response for expansion")
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"Error parsing node_maker expansion response: {e}")
+        print(f"Response was: {node_maker_response[:500]}")
+        raise ValueError(f"Failed to parse child scenarios: {str(e)}")
+
+    print(f"✅ Generated {len(scenarios)} level-{branch_level} ({focus['name']}) scenarios")
+    return scenarios
