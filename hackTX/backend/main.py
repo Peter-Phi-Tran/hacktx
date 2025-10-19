@@ -4,10 +4,15 @@ AI-powered financial advisor for Toyota vehicle financing
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from .config import settings
+from starlette.middleware.sessions import SessionMiddleware
+import uvicorn
 from .routes import router
+from .config import settings
+from .database import engine, Base
 
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -16,10 +21,20 @@ app = FastAPI(
     version=settings.app_version
 )
 
+# Add session middleware for OAuth
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.secret_key,
+    session_cookie="session",
+    max_age=3600,
+    same_site="lax",
+    https_only=False  # Set to True in production with HTTPS
+)
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=["http://localhost:5173", "http://localhost:3000", settings.frontend_url],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,10 +56,9 @@ async def root():
 
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(
-        "hackTX.backend.main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=settings.reload
+        "backend.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
     )
