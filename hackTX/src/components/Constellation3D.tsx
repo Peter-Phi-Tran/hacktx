@@ -211,13 +211,19 @@ const generateFinancingScenarios = (parentStar: VehicleStar, parentIndex: number
     }
   ]
 
-  // Position child nodes in a circle around the parent
-  const radius = 5
+  // Position child nodes close together in 3D space around the parent for constellation effect
+  const radiusVariations = [2, 3, 2.5, 3.5, 2.8] // Close distances from parent
+  const zOffsets = [-1.5, 1, -1, 2, 0.5] // Small varied Z positions
+  const angleOffsets = [0.3, -0.2, 0.5, -0.4, 0.1] // Asymmetry
+  
   return scenarios.map((scenario, index) => {
-    const angle = (index / scenarios.length) * Math.PI * 2
+    const baseAngle = (index / scenarios.length) * Math.PI * 2
+    const angle = baseAngle + angleOffsets[index]
+    const radius = radiusVariations[index]
+    
     const xOffset = Math.cos(angle) * radius
     const yOffset = Math.sin(angle) * radius
-    const zOffset = (Math.random() - 0.5) * 3
+    const zOffset = zOffsets[index]
 
     const loanAmount = basePrice - scenario.downPayment
     const monthlyRate = scenario.interestRate / 100 / 12
