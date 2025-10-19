@@ -1,29 +1,96 @@
-import { useState, useEffect } from 'react'
-import { LandingPage } from './components/LandingPage'
-import { FinancialDashboard } from './components/FinancialDashboard'
+import { useState, useEffect } from "react"
+import { LandingPage } from "./components/LandingPage"
+import InterviewPage from "./components/InterviewPage"
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Check if user is authenticated (for testing, check localStorage)
-    const authStatus = localStorage.getItem('isAuthenticated')
-    if (authStatus === 'true') {
-      setIsAuthenticated(true)
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('token')
+    const errorParam = params.get('error')
+    
+    if (errorParam) {
+      setError(`Authentication failed: ${errorParam}`)
+      setIsLoading(false)
+      window.history.replaceState({}, document.title, "/")
+      return
     }
-    setIsLoading(false)
+    
+    if (token) {
+      // Store token
+      localStorage.setItem('auth_token', token)
+      
+      // Fetch user info
+      const backendUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/+$/, '')
+      
+      fetch(`${backendUrl}/auth/me?token=${token}`, {
+        credentials: 'include'
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to authenticate')
+          return res.json()
+        })
+        .then(data => {
+          setUser(data)
+          setIsAuthenticated(true)
+          setError(null)
+          window.history.replaceState({}, document.title, "/")
+        })
+        .catch(err => {
+          console.error('Failed to fetch user:', err)
+          setError('Failed to authenticate. Please try again.')
+          localStorage.removeItem('auth_token')
+        })
+        .finally(() => setIsLoading(false))
+    } else {
+      // Check if we have a stored token
+      const storedToken = localStorage.getItem('auth_token')
+      if (storedToken) {
+        const backendUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/+$/, '')
+        
+        fetch(`${backendUrl}/auth/me?token=${storedToken}`, {
+          credentials: 'include'
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Token expired')
+            return res.json()
+          })
+          .then(data => {
+            setUser(data)
+            setIsAuthenticated(true)
+          })
+          .catch(err => {
+            console.error('Token validation failed:', err)
+            localStorage.removeItem('auth_token')
+          })
+          .finally(() => setIsLoading(false))
+      } else {
+        setIsLoading(false)
+      }
+    }
   }, [])
 
   const handleLogin = () => {
-    // For testing purposes, simulate login
-    localStorage.setItem('isAuthenticated', 'true')
     setIsAuthenticated(true)
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated')
+    const token = localStorage.getItem('auth_token')
+    if (token) {
+      const backendUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/+$/, '')
+      fetch(`${backendUrl}/auth/logout?token=${token}`, { 
+        method: 'POST',
+        credentials: 'include'
+      })
+        .catch(err => console.error('Logout error:', err))
+    }
+    localStorage.removeItem('auth_token')
     setIsAuthenticated(false)
+    setUser(null)
   }
 
   if (isLoading) {
@@ -33,22 +100,48 @@ function App() {
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh',
-        background: '#0a0e27'
+        background: '#0a0a0a',
+        color: '#fff'
       }}>
-        <div style={{ color: '#fff' }}>Loading...</div>
+        Loading...
       </div>
     )
   }
 
-  return (
-    <>
-      {!isAuthenticated ? (
-        <LandingPage onLogin={handleLogin} />
-      ) : (
-        <FinancialDashboard onLogout={handleLogout} />
-      )}
-    </>
-  )
+  if (error) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        background: '#0a0a0a',
+        color: '#fff',
+        gap: '20px'
+      }}>
+        <div style={{ color: '#ef4444' }}>❌ {error}</div>
+        <button 
+          onClick={() => {
+            setError(null)
+            window.location.href = '/'
+          }}
+          style={{
+            padding: '10px 20px',
+            background: '#667eea',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            cursor: 'pointer'
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    )
+  }
+
+  return isAuthenticated ? <InterviewPage /> : <LandingPage onLogin={handleLogin} />
 }
 
 export default App

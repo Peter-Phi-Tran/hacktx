@@ -1,13 +1,15 @@
 """
 Application configuration and settings
 """
-import os
-from typing import List
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
+import os
+from pathlib import Path
+from typing import List 
 
-load_dotenv()
-
+# Load .env from root directory
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(env_path)
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -26,7 +28,7 @@ class Settings(BaseSettings):
     cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]
     
     # Database Configuration
-    database_url: str = os.getenv("DATABASE_URL", "")
+    database_url: str = os.getenv("DATABASE_URL", "sqlite:///./interview.db")
     
     # Google AI Configuration
     google_api_key: str = os.getenv("GOOGLE_API_KEY", "")
@@ -38,11 +40,19 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     
+    # Google OAuth
+    google_client_id: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    google_client_secret: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    google_redirect_uri: str = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
+    
+    # Frontend URL for redirects
+    frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:5173")  # Changed this
+    backend_url: str = os.getenv("VITE_BACKEND_URL", "http://localhost:8000")
+    
     class Config:
-        env_file = ".env"
+        env_file = str(env_path)
         case_sensitive = False
-        extra = "ignore"  # Allow extra fields in .env file without errors
-
-
+        extra = "ignore" 
+        
 # Global settings instance
 settings = Settings()

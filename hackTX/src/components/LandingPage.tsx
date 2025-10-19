@@ -6,20 +6,13 @@ interface LandingPageProps {
   onLogin: () => void
 }
 
-/**
- * Consolidated Landing Page Component
- * All landing page UI elements are contained here for simplicity
- */
 export const LandingPage = ({ onLogin }: LandingPageProps) => {
   const handleSignIn = () => {
-    // For testing: just call onLogin to simulate authentication
-    // In production, this would redirect to Google OAuth
-    onLogin()
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"
+    const cleanBackendUrl = backendUrl.replace(/\/+$/, "")
     
-    // Production code (commented out for testing):
-    // const raw = (import.meta.env.VITE_BACKEND_URL as string) || "http://localhost:5000"
-    // const backend = raw.replace(/\/+$/, "")
-    // window.location.href = `${backend}/auth/google`
+    // Redirect to Google OAuth
+    window.location.href = `${cleanBackendUrl}/auth/google`
   }
 
   return (
