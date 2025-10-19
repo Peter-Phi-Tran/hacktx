@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     
     # Google AI Configuration
     google_api_key: str = os.getenv("GOOGLE_API_KEY", "")
+    google_cloud_project: str = os.getenv("GOOGLE_CLOUD_PROJECT", "")
+    google_cloud_location: str = os.getenv("GOOGLE_CLOUD_LOCATION", "global")
     
     # Authentication (for future use)
     secret_key: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
@@ -39,6 +41,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # Allow extra fields in .env file without errors
 
 
 # Global settings instance
