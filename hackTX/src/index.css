@@ -400,10 +400,11 @@ body {
    CONSTELLATION VIEW
    ============================================ */
 .constellation-demo {
+  display: flex;
   position: relative;
   width: 100%;
-  height: 100%;
-  background: transparent;
+  height: 100vh;
+  background: linear-gradient(to bottom, #0f172a, #000000);
   overflow: hidden;
 }
 

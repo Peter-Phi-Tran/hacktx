@@ -50,7 +50,7 @@ Example output format:
 """
 
 node_maker_agent = Agent(
-	model='gemini-2.0-flash-exp',
+	model='gemini-2.5-flash',
 	name='node_maker_agent',
 	description="Generates exactly 5 realistic auto financing scenarios in strict JSON format.",
 	instruction=NODE_MAKER_INSTRUCTION,

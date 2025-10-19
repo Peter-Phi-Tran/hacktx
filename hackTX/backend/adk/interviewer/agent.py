@@ -36,8 +36,10 @@ At the end, summarize all the collected information in a structured format.
 """
 
 interviewer_agent = Agent(
-	model='gemini-2.0-flash-exp',
+	model='gemini-2.5-flash',
 	name='interviewer_agent',
 	description="Interviews users one question at a time to collect Toyota financing information.",
 	instruction=INTERVIEWER_INSTRUCTION,
 )
+
+root_agent = interviewer_agent

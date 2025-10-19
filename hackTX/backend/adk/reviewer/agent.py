@@ -34,7 +34,7 @@ IMPORTANT: Output ONLY the JSON object. No extra text or explanations.
 """
 
 reviewer_agent = Agent(
-	model='gemini-2.0-flash-exp',
+	model='gemini-2.5-flash',
 	name='reviewer_agent',
 	description="Reviews interview conversations to extract and validate complete Toyota financing profiles.",
 	instruction=REVIEWER_INSTRUCTION,

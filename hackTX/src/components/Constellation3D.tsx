@@ -1,46 +1,49 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Stars, PerspectiveCamera } from '@react-three/drei'
-import { useEffect } from 'react'
-import { Car3D } from './Car3D'
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Stars, PerspectiveCamera } from "@react-three/drei";
+import { useEffect } from "react";
+import { Car3D } from "./Car3D";
 import {
   useConstellationSelection,
   useFinancingScenarios,
   useCameraControls,
   useCarTarget,
   type VehicleStar,
-  type FinancingScenario
-} from '../hooks/useConstellation'
-import { generateFinancingScenarios } from '../utils/financing'
-import { VehicleSphere } from './VehicleSphere'
-import { UserNode } from './UserNode'
-import type { UserConfig } from '../types'
+  type FinancingScenario,
+} from "../hooks/useConstellation";
+import { generateFinancingScenarios } from "../utils/financing";
+import { VehicleSphere } from "./VehicleSphere";
+import { UserNode } from "./UserNode";
+import type { UserConfig } from "../types";
 
 interface Constellation3DProps {
-  stars: VehicleStar[]
-  userConfig: UserConfig
+  stars: VehicleStar[];
+  userConfig: UserConfig;
+  onStarClick?: (star: VehicleStar) => void;
 }
 
-export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => {
+export const Constellation3D = ({
+  stars,
+  userConfig,
+  onStarClick,
+}: Constellation3DProps) => {
   // Use custom hooks for state management
   const {
-    selectedStar, setSelectedStar,
-    hoveredStar, setHoveredStar,
-    selectedScenario, setSelectedScenario,
-    showUserInfo, setShowUserInfo,
-    isHoveringUser, setIsHoveringUser
-  } = useConstellationSelection()
+    selectedStar,
+    setSelectedStar,
+    hoveredStar,
+    setHoveredStar,
+    selectedScenario,
+    setSelectedScenario,
+    showUserInfo,
+    setShowUserInfo,
+    isHoveringUser,
+    setIsHoveringUser,
+  } = useConstellationSelection();
 
-  const {
-    financingScenarios,
-    expandedStarId,
-    addScenarios
-  } = useFinancingScenarios()
+  const { financingScenarios, expandedStarId, addScenarios } =
+    useFinancingScenarios();
 
-  const {
-    cameraTarget,
-    controlsRef,
-    focusOnNode
-  } = useCameraControls()
+  const { cameraTarget, controlsRef, focusOnNode } = useCameraControls();
 
   // Get target position for car to move to
   const targetPosition = useCarTarget(
@@ -49,49 +52,57 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
     selectedScenario,
     isHoveringUser,
     showUserInfo
-  )
+  );
 
   // Update camera target when a node is clicked
   useEffect(() => {
     if (controlsRef.current) {
-      controlsRef.current.target.set(...cameraTarget)
-      controlsRef.current.update()
+      controlsRef.current.target.set(...cameraTarget);
+      controlsRef.current.update();
     }
-  }, [cameraTarget])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraTarget]);
 
   // Handle node selection and update camera focus
   const handleStarClick = (star: VehicleStar) => {
-    setSelectedStar(star)
-    focusOnNode(star.x / 15, star.y / 15, star.z / 15)
-  }
+    setSelectedStar(star);
+    focusOnNode(star.x / 15, star.y / 15, star.z / 15);
+    // Trigger external callback if provided (for modal popup)
+    if (onStarClick) {
+      onStarClick(star);
+    }
+  };
 
   const handleScenarioClick = (scenario: FinancingScenario) => {
-    setSelectedScenario(scenario)
-    focusOnNode(scenario.x / 15, scenario.y / 15, scenario.z / 15)
-  }
+    setSelectedScenario(scenario);
+    focusOnNode(scenario.x / 15, scenario.y / 15, scenario.z / 15);
+  };
 
   const handleUserNodeClick = () => {
-    setShowUserInfo(!showUserInfo)
-    focusOnNode(0, 0, 0)
-  }
+    setShowUserInfo(!showUserInfo);
+    focusOnNode(0, 0, 0);
+  };
 
   // Handle exploring financing options
   const handleExploreFinancing = () => {
     if (selectedStar && !selectedStar.parentId) {
-      const scenarios = generateFinancingScenarios(selectedStar, selectedStar.id)
-      addScenarios(scenarios, selectedStar.id)
-      setSelectedStar(null) // Close the details panel
+      const scenarios = generateFinancingScenarios(
+        selectedStar,
+        selectedStar.id
+      );
+      addScenarios(scenarios, selectedStar.id);
+      setSelectedStar(null); // Close the details panel
     }
-  }
+  };
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <Canvas>
         <PerspectiveCamera makeDefault position={[0, 5, 20]} fov={60} />
-        <OrbitControls 
+        <OrbitControls
           ref={controlsRef}
-          enablePan={true} 
-          enableZoom={true} 
+          enablePan={true}
+          enableZoom={true}
           enableRotate={true}
           minDistance={5}
           maxDistance={100}
@@ -106,13 +117,25 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
         {/* Lighting */}
         <ambientLight intensity={0.3} />
         <directionalLight position={[10, 10, 10]} intensity={0.5} />
-        <pointLight position={[-10, -10, -10]} intensity={0.3} color="#93c5fd" />
+        <pointLight
+          position={[-10, -10, -10]}
+          intensity={0.3}
+          color="#93c5fd"
+        />
 
         {/* Background stars */}
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+        <Stars
+          radius={100}
+          depth={50}
+          count={5000}
+          factor={4}
+          saturation={0}
+          fade
+          speed={1}
+        />
 
         {/* Center User Node */}
-        <UserNode 
+        <UserNode
           userConfig={userConfig}
           isHovered={isHoveringUser}
           onPointerOver={() => setIsHoveringUser(true)}
@@ -121,7 +144,12 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
         />
 
         {/* Car starts at user node and moves to hovered/selected stars */}
-        <Car3D position={[0, 0, 0]} color="#93c5fd" scale={0.4} targetPosition={targetPosition} />
+        <Car3D
+          position={[0, 0, 0]}
+          color="#93c5fd"
+          scale={0.4}
+          targetPosition={targetPosition}
+        />
 
         {/* Vehicle stars */}
         {stars.map((star) => (
@@ -138,7 +166,7 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
 
         {/* Financing scenario child nodes */}
         {financingScenarios.map((scenario) => {
-          const parentStar = stars.find(s => s.id === scenario.parentId)
+          const parentStar = stars.find((s) => s.id === scenario.parentId);
           return (
             <group key={`scenario-${scenario.id}`}>
               {/* Connection line from parent to child */}
@@ -148,21 +176,39 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
                     <bufferAttribute
                       attach="attributes-position"
                       count={2}
-                      array={new Float32Array([
-                        parentStar.x / 15, parentStar.y / 15, parentStar.z / 15,
-                        scenario.x / 15, scenario.y / 15, scenario.z / 15
-                      ])}
+                      array={
+                        new Float32Array([
+                          parentStar.x / 15,
+                          parentStar.y / 15,
+                          parentStar.z / 15,
+                          scenario.x / 15,
+                          scenario.y / 15,
+                          scenario.z / 15,
+                        ])
+                      }
                       itemSize={3}
-                      args={[new Float32Array([
-                        parentStar.x / 15, parentStar.y / 15, parentStar.z / 15,
-                        scenario.x / 15, scenario.y / 15, scenario.z / 15
-                      ]), 3]}
+                      args={[
+                        new Float32Array([
+                          parentStar.x / 15,
+                          parentStar.y / 15,
+                          parentStar.z / 15,
+                          scenario.x / 15,
+                          scenario.y / 15,
+                          scenario.z / 15,
+                        ]),
+                        3,
+                      ]}
                     />
                   </bufferGeometry>
-                  <lineBasicMaterial color={scenario.color} opacity={0.6} transparent linewidth={2} />
+                  <lineBasicMaterial
+                    color={scenario.color}
+                    opacity={0.6}
+                    transparent
+                    linewidth={2}
+                  />
                 </line>
               )}
-              
+
               {/* Scenario sphere */}
               <VehicleSphere
                 star={scenario as VehicleStar}
@@ -173,23 +219,23 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
                 onPointerOut={() => {}}
               />
             </group>
-          )
+          );
         })}
       </Canvas>
 
       {/* Legend - positioned over the 3D scene */}
       <div className="constellation-legend">
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#4ade80' }}></span>
-          <span>Excellent Match</span>
+          <span className="legend-dot" style={{ background: "#4A90E2" }}></span>
+          <span>Financing Plans</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#60a5fa' }}></span>
-          <span>Good Match</span>
+          <span className="legend-dot" style={{ background: "#10B981" }}></span>
+          <span>Lease Plans</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot" style={{ background: '#fbbf24' }}></span>
-          <span>Stretch Option</span>
+          <span className="legend-text">⭐</span>
+          <span>Larger = Better Match</span>
         </div>
       </div>
 
@@ -205,13 +251,15 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
               ✕
             </button>
           </div>
-          
+
           <div className="details-body">
             <div className="detail-row">
               <span className="label">Monthly Income:</span>
-              <span className="value">${userConfig.income.toLocaleString()}</span>
+              <span className="value">
+                ${userConfig.income.toLocaleString()}
+              </span>
             </div>
-            
+
             <div className="detail-row">
               <span className="label">Credit Score:</span>
               <span className="value">{userConfig.creditScore}</span>
@@ -219,7 +267,9 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
 
             <div className="detail-row">
               <span className="label">Down Payment:</span>
-              <span className="value">${userConfig.downPayment.toLocaleString()}</span>
+              <span className="value">
+                ${userConfig.downPayment.toLocaleString()}
+              </span>
             </div>
 
             <div className="detail-row">
@@ -233,7 +283,10 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
             </div>
           </div>
 
-          <button className="explore-btn" onClick={() => setShowUserInfo(false)}>
+          <button
+            className="explore-btn"
+            onClick={() => setShowUserInfo(false)}
+          >
             Explore Vehicle Options →
           </button>
         </div>
@@ -244,37 +297,34 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
         <div className="vehicle-details">
           <div className="details-header">
             <h2>{selectedStar.vehicle}</h2>
-            <button
-              className="close-btn"
-              onClick={() => setSelectedStar(null)}
-            >
+            <button className="close-btn" onClick={() => setSelectedStar(null)}>
               ✕
             </button>
           </div>
-          
+
           <div className="details-body">
             <div className="detail-row">
               <span className="label">Monthly Payment:</span>
               <span className="value">${selectedStar.monthly_payment}</span>
             </div>
-            
+
             <div className="detail-row">
               <span className="label">Affordability:</span>
               <span
                 className="value affordability-badge"
                 style={{
                   background:
-                    selectedStar.affordability === 'excellent'
-                      ? '#4ade8033'
-                      : selectedStar.affordability === 'good'
-                      ? '#60a5fa33'
-                      : '#fbbf2433',
+                    selectedStar.affordability === "excellent"
+                      ? "#4ade8033"
+                      : selectedStar.affordability === "good"
+                      ? "#60a5fa33"
+                      : "#fbbf2433",
                   color:
-                    selectedStar.affordability === 'excellent'
-                      ? '#4ade80'
-                      : selectedStar.affordability === 'good'
-                      ? '#60a5fa'
-                      : '#fbbf24',
+                    selectedStar.affordability === "excellent"
+                      ? "#4ade80"
+                      : selectedStar.affordability === "good"
+                      ? "#60a5fa"
+                      : "#fbbf24",
                 }}
               >
                 {selectedStar.affordability.charAt(0).toUpperCase() +
@@ -297,14 +347,14 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
             )}
           </div>
 
-          <button 
+          <button
             className="explore-btn"
             onClick={handleExploreFinancing}
             disabled={expandedStarId === selectedStar.id}
           >
-            {expandedStarId === selectedStar.id 
-              ? '✓ Scenarios Generated' 
-              : 'Explore Financing Options →'}
+            {expandedStarId === selectedStar.id
+              ? "✓ Scenarios Generated"
+              : "Explore Financing Options →"}
           </button>
         </div>
       )}
@@ -321,13 +371,15 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
               ✕
             </button>
           </div>
-          
+
           <div className="details-body">
             <div className="detail-row">
               <span className="label">Down Payment:</span>
-              <span className="value">${selectedScenario.details.downPayment.toFixed(0)}</span>
+              <span className="value">
+                ${selectedScenario.details.downPayment.toFixed(0)}
+              </span>
             </div>
-            
+
             <div className="detail-row">
               <span className="label">Monthly Payment:</span>
               <span className="value">${selectedScenario.monthly_payment}</span>
@@ -335,39 +387,51 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
 
             <div className="detail-row">
               <span className="label">Loan Term:</span>
-              <span className="value">{selectedScenario.details.loanTerm} months</span>
+              <span className="value">
+                {selectedScenario.details.loanTerm} months
+              </span>
             </div>
 
             <div className="detail-row">
               <span className="label">Interest Rate:</span>
-              <span className="value">{selectedScenario.details.interestRate}%</span>
+              <span className="value">
+                {selectedScenario.details.interestRate}%
+              </span>
             </div>
 
             <div className="detail-row">
               <span className="label">Total Cost:</span>
-              <span className="value">${selectedScenario.details.totalCost.toFixed(0)}</span>
+              <span className="value">
+                ${selectedScenario.details.totalCost.toFixed(0)}
+              </span>
             </div>
 
             <div className="detail-row">
               <span className="label">Comparison:</span>
-              <span 
+              <span
                 className="value"
-                style={{ 
-                  color: selectedScenario.details.savingsVsBase >= 0 ? '#4ade80' : '#fbbf24' 
+                style={{
+                  color:
+                    selectedScenario.details.savingsVsBase >= 0
+                      ? "#4ade80"
+                      : "#fbbf24",
                 }}
               >
-                {selectedScenario.details.savingsVsBase >= 0 ? 'Save' : 'Cost'} ${Math.abs(selectedScenario.details.savingsVsBase).toFixed(0)}
+                {selectedScenario.details.savingsVsBase >= 0 ? "Save" : "Cost"}{" "}
+                ${Math.abs(selectedScenario.details.savingsVsBase).toFixed(0)}
               </span>
             </div>
 
-            <div style={{ 
-              marginTop: '1rem', 
-              padding: '0.75rem', 
-              background: 'rgba(59, 130, 246, 0.1)', 
-              borderRadius: '8px', 
-              borderLeft: '3px solid #3b82f6' 
-            }}>
-              <p style={{ fontSize: '0.875rem', color: '#e0e7ff', margin: 0 }}>
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "0.75rem",
+                background: "rgba(59, 130, 246, 0.1)",
+                borderRadius: "8px",
+                borderLeft: "3px solid #3b82f6",
+              }}
+            >
+              <p style={{ fontSize: "0.875rem", color: "#e0e7ff", margin: 0 }}>
                 {selectedScenario.outcome}
               </p>
             </div>
@@ -376,23 +440,35 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
       )}
 
       {/* Camera controls hint */}
-      <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '20px',
-        color: '#94a3b8',
-        fontSize: '12px',
-        background: 'rgba(15, 23, 42, 0.8)',
-        padding: '8px 12px',
-        borderRadius: '8px',
-        border: '1px solid rgba(147, 197, 253, 0.2)',
-      }}>
-        <div>🌟 <strong>Center node:</strong> Your financial profile</div>
-        <div>🚗 <strong>Car:</strong> Orbits hovered/selected vehicles</div>
-        <div>👆 <strong>Hover:</strong> Vehicle stars to explore</div>
-        <div>👉 <strong>Click:</strong> View detailed information</div>
-        <div>🖱️ <strong>Drag:</strong> Rotate • <strong>Scroll:</strong> Zoom</div>
+      <div
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          left: "20px",
+          color: "#94a3b8",
+          fontSize: "12px",
+          background: "rgba(15, 23, 42, 0.8)",
+          padding: "8px 12px",
+          borderRadius: "8px",
+          border: "1px solid rgba(147, 197, 253, 0.2)",
+        }}
+      >
+        <div>
+          🌟 <strong>Center node:</strong> Your financial profile
+        </div>
+        <div>
+          🚗 <strong>Car:</strong> Orbits hovered/selected vehicles
+        </div>
+        <div>
+          👆 <strong>Hover:</strong> Vehicle stars to explore
+        </div>
+        <div>
+          👉 <strong>Click:</strong> View detailed information
+        </div>
+        <div>
+          🖱️ <strong>Drag:</strong> Rotate • <strong>Scroll:</strong> Zoom
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};

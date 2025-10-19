@@ -2,8 +2,8 @@
 Initialize database tables
 Run this script to create all tables defined in your models
 """
-from backend.database import engine, Base
-from backend.models import User, FinancialProfile
+from hackTX.backend.database import engine, Base
+from hackTX.backend.models import User, FinancialProfile, InterviewSession
 
 def init_db():
     print("Creating database tables...")
