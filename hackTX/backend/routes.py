@@ -95,21 +95,18 @@ async def logout(token: str):
 # ===== INTERVIEW ROUTES =====
 @router.post("/api/interview/start", response_model=InterviewStartResponse)
 async def start_interview():
-    """Start a new interview session with ADK agent"""
+    """Start new interview session"""
     try:
-        # Create session ID
         session_id = str(uuid.uuid4())
         
-        # Initialize RootAgent for this session
+        # Create new agent instance for this session
         agent = RootAgent()
-        
-        # Get first question from interviewer agent
         first_question = agent.start_interview()
         
         # Store session
         interview_sessions[session_id] = {
             "agent": agent,
-            "created_at": str(uuid.uuid4()),  # timestamp
+            "created_at": str(uuid.uuid4())
         }
         
         return InterviewStartResponse(
@@ -117,6 +114,9 @@ async def start_interview():
             question=first_question
         )
     except Exception as e:
+        print(f"[Routes] Error starting interview: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to start interview: {str(e)}")
 
 @router.post("/api/interview/answer", response_model=AnswerResponse)

@@ -1,5 +1,5 @@
-from google.adk.agents import LlmAgent
 from typing import Dict, Any
+from google.adk.agents.llm_agent import Agent
 
 REVIEWER_INSTRUCTION = """
 You are a helpful assistant that analyzes an interview conversation and extracts key information to populate a user's profile for Toyota financing or leasing.
@@ -70,32 +70,39 @@ def check_interview_completeness(conversation_history: str, metadata: Dict[str, 
         "reason": reason
     }
 
-class ReviewerAgent(LlmAgent):
-    def __init__(self, **kwargs):
+class ReviewerAgent(Agent):
+    def __init__(self):
         super().__init__(
-            instruction=REVIEWER_INSTRUCTION,
-            **kwargs,
+            name="reviewer_agent",
+            model="gemini-2.0-flash-exp",
+            description="Reviews and validates user responses to generate structured financial data.",
+            instruction="""
+You are a financial data reviewer for Toyota Financial Services.
+
+Your job is to:
+1. Review all user responses from the interview
+2. Validate the information provided
+3. Extract key financial data (income, credit score, vehicle preferences, etc.)
+4. Structure the data into a clean JSON format for further processing
+
+Be thorough and accurate in your response.
+"""
         )
-
-    def review(self, interviewer_output: Dict[str, Any]) -> Dict[str, Any]:
-        conversation = interviewer_output.get("conversation", "")
-        metadata = interviewer_output.get("metadata", {})
-
-        completeness = check_interview_completeness(conversation, metadata)
-        if not completeness["is_complete"]:
-            return {
-                "is_complete": False,
-                "reason": completeness["reason"],
-                "missing_topics": completeness["missing_areas"]
-            }
+    
+    def process(self, answers):
+        """
+        Process answers and return structured JSON
+        
+        Args:
+            answers: List of {"question": str, "answer": str}
+            
+        Returns:
+            Dict with structured interview data
+        """
+        print(f"[ReviewerAgent] Processing {len(answers)} answers...")
+        
         return {
-            "is_complete": True,
-            **metadata
+            "user_responses": answers,
+            "total_questions": len(answers),
+            "status": "processed"
         }
-
-# Instantiate the agent OUTSIDE the class
-reviewer_agent = ReviewerAgent(
-    name="reviewer_agent",
-    description="An agent that reviews interview conversations to determine completeness",
-    model="gemini-2.0-flash-exp",
-)

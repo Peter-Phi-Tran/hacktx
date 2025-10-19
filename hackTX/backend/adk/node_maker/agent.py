@@ -1,76 +1,123 @@
-from google.adk.agents import LlmAgent
+from google.adk.agents.llm_agent import Agent
 
-AGENT_INSTRUCTION = """
-You are an expert **Auto Financing Scenario Generator** for Toyota Financial Services. 
-Your role is to create realistic, personalized, and financially sound vehicle financing or leasing scenarios for a specific customer profile.
+# Tool for the agent to use
+def check_financing_completeness(
+	user_name: str,
+	income: float,
+	credit_score: int,
+	financing_goal: str,
+	preferred_lease_or_buy: str,
+	vehicle_preferences: str,
+	current_vehicle: str,
+	location: str
+) -> dict:
+	"""
+	Call this function when the agent has gathered enough information about the user's vehicle financing needs.
+	Returns personalized recommendations and tips.
+	"""
+	return {
+		"status": "complete",
+		"message": f"Financing profile captured for {user_name}. Recommendations and payment simulations are ready.",
+		"recommendations": {
+			"suggested_vehicles": ["Toyota Camry", "Toyota RAV4"],
+			"lease_or_buy": preferred_lease_or_buy,
+			"tips": [
+				"Improve credit score for lower interest rates",
+				"Consider a 36-month lease for lower monthly payments",
+				"Compare financing plans to find the best APR"
+			]
+		}
+	}
 
-Your personality is: Professional, analytical, and customer-focused. You always prioritize financial clarity, responsible advice, and accuracy in payment projections.
+root_agent = Agent(
+	model='gemini-2.5-flash',
+	name='interviewer_agent',
+	description="Interviews users to provide personalized Toyota financing or leasing options.",
+	instruction="""
+You are a smart, friendly Toyota Financial Services assistant. Your job is to help users find the best way to finance or lease their Toyota vehicle by providing:
+- Personalized financing or leasing options based on their income, credit score, and preferences
+- Clear payment simulations
+- Plan comparisons
+- Tips to improve financial decisions
+- (Optionally) Toyota model suggestions that fit the user’s budget and lifestyle
 
-When given a prompt, you will receive:
-- A structured user profile (includes income, credit score, financial goals, preferences, etc.)
-- Plan comparisons and payment simulations from the reviewer agent
-- Optional suggestions for Toyota vehicle models that fit the user’s lifestyle and budget
+How to proceed:
+- Start by asking for the user's NAME
+- Ask about their INCOME and CREDIT SCORE
+- Ask whether they prefer BUYING or LEASING
+- Ask about their vehicle preferences, budget, and lifestyle
+- Ask about their current vehicle, if any
+- Ask about their location to consider regional offers
+- For each step, keep your questions concise, clear, and professional
+- Ask ONE question at a time and wait for their response
 
-Your task is to generate diverse, realistic financing scenarios in **strict JSON format**. Each scenario should be:
-1. **Contextually Accurate:** Based on the user’s provided income, credit score, and preferences (buy vs. lease).
-2. **Financially Sound:** Monthly payments, interest rates, and loan terms must be realistic and consistent with U.S. market averages.
-3. **Distinct:** Each scenario should represent a different financial path (e.g., different loan terms, down payment strategies, or lease options).
-4. **Actionable:** Include recommendations and reasoning that help the user make an informed decision.
-
-ALWAYS respond with a JSON array containing the requested number of scenarios.  
-Each object in the array must include the following fields:
-
-- "name": Short label (2–4 words) describing the scenario, e.g., "Standard Purchase Plan" or "Hybrid Lease Option"
-- "title": 5–10 word description summarizing the scenario, e.g., "60-Month Finance Plan for Toyota Camry Hybrid"
-- "description": A concise explanation (2–3 sentences) describing the financing or leasing option, tailored to the user’s profile
-- "plan_type": Either "finance" or "lease"
-- "down_payment": Recommended down payment amount (numeric, in USD)
-- "monthly_payment": Estimated monthly payment amount (numeric, in USD)
-- "term_months": Total number of months for the plan
-- "interest_rate": Annual Percentage Rate (APR) for finance plans, or Money Factor for leases
-- "positivity_score": A number between 0–100 indicating how favorable the plan is for the customer (higher = better fit)
-- "recommendations": Brief financial tips or suggestions (1–2 sentences)
-- "suggested_model": Recommended Toyota model(s) that align with the customer’s lifestyle and budget
-
-CRITICAL RULES:
-- You must use **only the provided customer data** from the reviewer agent (e.g., income, credit score, preferred_lease_or_buy, vehicle_preferences).
-- Ensure **numeric values** (income, credit score, payments) are consistent and realistic.
-- **Never include fictional or placeholder data** — base all responses on the structured information given.
-- Generate **financially distinct** scenarios: for example, a short-term high-payment plan, a long-term low-payment plan, and a lease option.
-- **Output strictly valid JSON only** — no explanations, comments, or additional text.
-
-Example output format:
-
-[
-  {
-    "name": "Standard Finance Plan",
-    "title": "60-Month Financing for Toyota Camry Hybrid",
-    "description": "A 5-year financing plan with a moderate monthly payment and low fixed interest rate. Best for stable earners who plan to own the vehicle long-term.",
-    "plan_type": "finance",
-    "down_payment": 5000,
-    "monthly_payment": 350,
-    "term_months": 60,
-    "interest_rate": 3.5,
-    "positivity_score": 85,
-    "recommendations": "Consider an additional down payment to further lower monthly costs.",
-    "suggested_model": "Toyota Camry Hybrid"
-  }
-]
-"""
-
+Once all information is collected, call the `check_financing_completeness` tool to finalize recommendations, including payment simulations, plan comparisons, and model suggestions.
+""",
+	tools=[check_financing_completeness],
+)
 
 class NodeMakerAgent:
-    def __init__(self, **kwargs):
+    def __init__(self):
         pass
+    
+    def process(self, json_data):
+        """
+        Take JSON data and generate recommendations/nodes
+        
+        Args:
+            json_data: Structured data from ReviewerAgent
+            
+        Returns:
+            Dict with recommendations and nodes
+        """
+        print(f"[NodeMakerAgent] Processing data and generating recommendations...")
+        
+        # For now, return a simple recommendation structure
+        # You can enhance this with database lookup and AI later
+        return {
+            "recommendations": [
+                "Based on your responses, we have some vehicle options for you.",
+                "Our financing team will review your application."
+            ],
+            "nodes": [],
+            "status": "complete"
+        }
 
-    def process(self, reviewer_output):
-        # Return 5 dummy scenarios for testing
-        return [
-            {"name": "Scenario 1", "description": "Dummy event 1"},
-            {"name": "Scenario 2", "description": "Dummy event 2"},
-            {"name": "Scenario 3", "description": "Dummy event 3"},
-            {"name": "Scenario 4", "description": "Dummy event 4"},
-            {"name": "Scenario 5", "description": "Dummy event 5"},
-        ]
+class ReviewerAgent(Agent):
+    def __init__(self):
+        super().__init__(
+            name='reviewer_agent',  # ADD THIS - it was missing!
+            model='gemini-2.5-flash',
+            description="Reviews and validates user responses to generate structured financial data.",
+            instruction="""
+You are a financial data reviewer for Toyota Financial Services.
 
-node_maker_agent = NodeMakerAgent()
+Your job is to:
+1. Review all user responses from the interview
+2. Validate the information provided
+3. Extract key financial data (income, credit score, vehicle preferences, etc.)
+4. Structure the data into a clean JSON format for further processing
+
+Be thorough and accurate in your analysis.
+"""
+        )
+    
+    def process(self, answers):
+        """
+        Process answers and return structured JSON
+        
+        Args:
+            answers: List of {"question": str, "answer": str}
+            
+        Returns:
+            Dict with structured interview data
+        """
+        print(f"[ReviewerAgent] Processing {len(answers)} answers...")
+        
+        # For now, return a simple structured format
+        # You can enhance this with AI processing later
+        return {
+            "user_responses": answers,
+            "total_questions": len(answers),
+            "status": "processed"
+        }

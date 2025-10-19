@@ -1,3 +1,4 @@
+from google.adk.agents.llm_agent import Agent
 import os
 from typing import List, Dict, Optional
 import google.generativeai as genai
@@ -5,149 +6,134 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Tool for the agent to use
+def check_financing_completeness(
+	user_name: str,
+	income: float,
+	credit_score: int,
+	financing_goal: str,
+	preferred_lease_or_buy: str,
+	vehicle_preferences: str,
+	current_vehicle: str,
+	location: str
+) -> dict:
+	"""
+	Call this function when the agent has gathered enough information about the user's vehicle financing needs.
+	Returns personalized recommendations and tips.
+	"""
+	return {
+		"status": "complete",
+		"message": f"Financing profile captured for {user_name}. Recommendations and payment simulations are ready.",
+		"recommendations": {
+			"suggested_vehicles": ["Toyota Camry", "Toyota RAV4"],
+			"lease_or_buy": preferred_lease_or_buy,
+			"tips": [
+				"Improve credit score for lower interest rates",
+				"Consider a 36-month lease for lower monthly payments",
+				"Compare financing plans to find the best APR"
+			]
+		}
+	}
+
 class InterviewerAgent:
     def __init__(self):
-        # Configure Google AI
+        # Configure AI model
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
-            raise ValueError("GOOGLE_API_KEY not set in environment variables")
+            print("[Interviewer] Warning: GOOGLE_API_KEY not set")
+            self.model = None
+        else:
+            genai.configure(api_key=api_key)
+            self.model = genai.GenerativeModel('gemini-pro')
         
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
-        
-        self.conversation_history: List[Dict[str, str]] = []
+        # Agent state
+        self.conversation_history: List[Dict] = []
         self.questions_asked = 0
         self.max_questions = 5
-        
-        # System prompt for the AI interviewer
-        self.system_prompt = """You are a friendly and professional automotive finance interviewer for Toyota Financial Services. 
-
-Your goal is to have a natural conversation to understand:
-- Customer's personal background and current situation
-- Employment status and income stability
-- Vehicle needs and preferences
-- Budget and financial goals
-- Credit history and financing preferences
-
-Guidelines:
-- Ask ONE question at a time
-- Keep questions conversational and friendly (2-3 sentences max)
-- Listen to their answers and ask relevant follow-ups
-- Be empathetic and understanding
-- After getting key information, naturally conclude
-
-Important: Return ONLY the question text, nothing else."""
+        self.current_question_text = ""
     
     def get_first_question(self) -> str:
-        """Generate the first interview question using AI"""
-        self.questions_asked = 1
-        
-        try:
-            prompt = f"""{self.system_prompt}
-
-This is the start of a vehicle financing interview. Ask an engaging opening question to learn about the customer's situation and why they're interested in vehicle financing today.
-
-Question:"""
-            
-            response = self.model.generate_content(prompt)
-            question = response.text.strip()
-            
-            self.conversation_history.append({
-                "role": "assistant",
-                "content": question
-            })
-            
-            print(f"[AI] Generated first question: {question}")
-            return question
-            
-        except Exception as e:
-            print(f"[ERROR] Failed to generate first question: {e}")
-            # Fallback
-            fallback = "Thank you for your interest in Toyota Financial Services! To help us better understand your needs, could you tell me a bit about your current situation and what brings you here today?"
-            self.conversation_history.append({
-                "role": "assistant",
-                "content": fallback
-            })
-            return fallback
-    
-    def get_next_question(self, user_answer: str, all_answers: List[Dict]) -> str:
-        """Generate next question based on conversation using AI"""
-        self.questions_asked += 1
-        
-        # Store user's answer
-        self.conversation_history.append({
-            "role": "user",
-            "content": user_answer
-        })
-        
-        # Check if we should end the interview
-        if self.questions_asked > self.max_questions:
-            closing = "Thank you so much for your time! We have all the information we need. Our team will review your responses and get back to you shortly with personalized vehicle financing options."
-            self.conversation_history.append({
-                "role": "assistant",
-                "content": closing
-            })
-            return closing
-        
-        try:
-            # Build conversation context for AI
-            conversation_text = ""
-            for msg in self.conversation_history:
-                role = "Interviewer" if msg["role"] == "assistant" else "Customer"
-                conversation_text += f"{role}: {msg['content']}\n\n"
-            
-            prompt = f"""{self.system_prompt}
-
-Conversation so far:
-{conversation_text}
-
-This is question {self.questions_asked} of {self.max_questions}. Based on what the customer just said, ask a relevant follow-up question to learn more about their vehicle financing needs.
-
-Question:"""
-            
-            response = self.model.generate_content(prompt)
-            next_question = response.text.strip()
-            
-            # Remove any quotes or extra formatting
-            next_question = next_question.strip('"').strip("'").strip()
-            
-            self.conversation_history.append({
-                "role": "assistant",
-                "content": next_question
-            })
-            
-            print(f"[AI] Generated question {self.questions_asked}: {next_question}")
-            return next_question
-            
-        except Exception as e:
-            print(f"[ERROR] AI generation failed: {e}")
-            # Fallback to generic question
-            return self._get_fallback_question()
-    
-    def _get_fallback_question(self) -> str:
-        """Fallback predefined questions if AI fails"""
-        questions = [
-            "Could you tell me about your current employment status?",
-            "What type of vehicle are you interested in?",
-            "Do you have a budget range in mind for monthly payments?",
-            "Have you financed a vehicle before?",
-            "What's most important to you in a financing plan?"
-        ]
-        
-        index = min(self.questions_asked - 1, len(questions) - 1)
-        question = questions[index]
+        """Generate and return the first question"""
+        question = "Thank you for your interest in Toyota Financial Services! To help us better understand your needs, could you tell me a bit about your current situation and what brings you here today?"
         
         self.conversation_history.append({
             "role": "assistant",
             "content": question
         })
         
-        print(f"[FALLBACK] Using predefined question: {question}")
+        self.current_question_text = question
+        self.questions_asked = 1
+        
         return question
     
-    def get_conversation_summary(self) -> Dict:
-        """Get a summary of the conversation"""
-        return {
-            "total_questions": self.questions_asked,
-            "conversation": self.conversation_history
-        }
+    def current_question(self) -> str:
+        """Return the current question"""
+        return self.current_question_text
+    
+    def next_question(self, answer: str) -> Optional[str]:
+        """Generate next question based on answer, or return None if complete"""
+        # Store user's answer
+        self.conversation_history.append({
+            "role": "user",
+            "content": answer
+        })
+        
+        # Check if we've asked enough questions
+        if self.questions_asked >= self.max_questions:
+            return None  # Interview complete
+        
+        # Generate next question using AI or predefined flow
+        if self.model:
+            next_q = self._generate_ai_question()
+        else:
+            next_q = self._get_fallback_question()
+        
+        self.conversation_history.append({
+            "role": "assistant",
+            "content": next_q
+        })
+        
+        self.current_question_text = next_q
+        self.questions_asked += 1
+        
+        return next_q
+    
+    def _generate_ai_question(self) -> str:
+        """Use AI to generate contextual follow-up question"""
+        try:
+            conversation = "\n".join([
+                f"{'Interviewer' if m['role']=='assistant' else 'User'}: {m['content']}"
+                for m in self.conversation_history
+            ])
+            
+            prompt = f"""You are conducting a financial interview for vehicle financing.
+
+Previous conversation:
+{conversation}
+
+Based on the conversation, ask the next relevant question to understand:
+- What type of vehicle they need
+- Their budget/payment range
+- Their financial situation
+- Their timeline for purchase
+
+Generate ONLY the next question (no explanation)."""
+            
+            response = self.model.generate_content(prompt)
+            return response.text.strip()
+        except Exception as e:
+            print(f"[Interviewer] AI question generation failed: {e}")
+            return self._get_fallback_question()
+    
+    def _get_fallback_question(self) -> str:
+        """Fallback questions if AI is unavailable"""
+        fallback_questions = [
+            "What type of vehicle are you interested in?",
+            "Do you have a budget range in mind for monthly payments?",
+            "What is your current employment situation?",
+            "When are you looking to make this purchase?",
+            "Have you financed a vehicle before?"
+        ]
+        
+        index = min(self.questions_asked, len(fallback_questions) - 1)
+        return fallback_questions[index]
