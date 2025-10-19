@@ -13,14 +13,7 @@ import {
 import { generateFinancingScenarios } from '../utils/financing'
 import { VehicleSphere } from './VehicleSphere'
 import { UserNode } from './UserNode'
-
-interface UserConfig {
-  income: number
-  creditScore: string
-  downPayment: number
-  monthlyBudget: number
-  loanTerm: number
-}
+import type { UserConfig } from '../types'
 
 interface Constellation3DProps {
   stars: VehicleStar[]

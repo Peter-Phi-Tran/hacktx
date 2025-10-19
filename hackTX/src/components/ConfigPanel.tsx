@@ -1,21 +1,11 @@
 import React from 'react'
-
-// Type definitions
-interface FinancialConfig {
-  income: number
-  creditScore: string
-  downPayment: number
-  monthlyBudget: number
-  loanTerm: number
-  vehicleTypes: string[]
-  priorities: string[]
-  additionalContext: string
-}
+import type { FinancialConfig } from '../types'
 
 interface ConfigPanelProps {
   config: FinancialConfig
   setConfig: (config: FinancialConfig | ((prev: FinancialConfig) => FinancialConfig)) => void
   onAnalyze?: () => void
+  onLogout?: () => void
 }
 
 const vehicleTypeOptions = [
@@ -51,7 +41,8 @@ const loanTermOptions = [36, 48, 60, 72]
 export const ConfigPanel: React.FC<ConfigPanelProps> = ({
   config,
   setConfig,
-  onAnalyze
+  onAnalyze,
+  onLogout
 }) => {
   const handleVehicleTypeToggle = (typeId: string) => {
     setConfig((prev) => ({
@@ -287,6 +278,13 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
       {onAnalyze && (
         <button onClick={onAnalyze} className="analyze-button">
             Regenerate Constellation
+        </button>
+      )}
+
+      {/* Logout Button */}
+      {onLogout && (
+        <button onClick={onLogout} className="logout-button">
+          Logout
         </button>
       )}
     </div>

@@ -1,18 +1,5 @@
 import { useState } from 'react'
-
-interface VehicleStar {
-  id: number
-  vehicle: string
-  x: number
-  y: number
-  z: number
-  size: number
-  color: string
-  monthly_payment: number
-  affordability: string
-  price_range?: string
-  why?: string
-}
+import type { VehicleStar } from '../types'
 
 interface ConstellationDemoProps {
   stars: VehicleStar[]
