@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stars, PerspectiveCamera } from '@react-three/drei'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Car3D } from './Car3D'
 import * as THREE from 'three'
 
@@ -268,6 +268,32 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
   const [financingScenarios, setFinancingScenarios] = useState<FinancingScenario[]>([])
   const [expandedStarId, setExpandedStarId] = useState<number | null>(null)
   const [selectedScenario, setSelectedScenario] = useState<FinancingScenario | null>(null)
+  const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([0, 0, 0])
+  const controlsRef = useRef<any>(null)
+
+  // Update camera target when a node is clicked
+  useEffect(() => {
+    if (controlsRef.current) {
+      controlsRef.current.target.set(...cameraTarget)
+      controlsRef.current.update()
+    }
+  }, [cameraTarget])
+
+  // Handle node selection and update camera focus
+  const handleStarClick = (star: VehicleStar) => {
+    setSelectedStar(star)
+    setCameraTarget([star.x / 15, star.y / 15, star.z / 15])
+  }
+
+  const handleScenarioClick = (scenario: FinancingScenario) => {
+    setSelectedScenario(scenario)
+    setCameraTarget([scenario.x / 15, scenario.y / 15, scenario.z / 15])
+  }
+
+  const handleUserNodeClick = () => {
+    setShowUserInfo(!showUserInfo)
+    setCameraTarget([0, 0, 0])
+  }
 
   // Handle exploring financing options
   const handleExploreFinancing = () => {
@@ -293,11 +319,18 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
       <Canvas>
         <PerspectiveCamera makeDefault position={[0, 5, 20]} fov={60} />
         <OrbitControls 
+          ref={controlsRef}
           enablePan={true} 
           enableZoom={true} 
           enableRotate={true}
-          minDistance={10}
-          maxDistance={50}
+          minDistance={5}
+          maxDistance={100}
+          target={[0, 0, 0]}
+          enableDamping={true}
+          dampingFactor={0.05}
+          panSpeed={1.5}
+          rotateSpeed={1}
+          zoomSpeed={1.2}
         />
 
         {/* Lighting */}
@@ -314,7 +347,7 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
           isHovered={isHoveringUser}
           onPointerOver={() => setIsHoveringUser(true)}
           onPointerOut={() => setIsHoveringUser(false)}
-          onClick={() => setShowUserInfo(!showUserInfo)}
+          onClick={handleUserNodeClick}
         />
 
         {/* Car starts at user node and moves to hovered/selected stars */}
@@ -327,7 +360,7 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
             star={star}
             isSelected={selectedStar?.id === star.id}
             isHovered={hoveredStar?.id === star.id}
-            onClick={() => setSelectedStar(star)}
+            onClick={() => handleStarClick(star)}
             onPointerOver={() => setHoveredStar(star)}
             onPointerOut={() => setHoveredStar(null)}
           />
@@ -365,7 +398,7 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
                 star={scenario as VehicleStar}
                 isSelected={selectedScenario?.id === scenario.id}
                 isHovered={false}
-                onClick={() => setSelectedScenario(scenario)}
+                onClick={() => handleScenarioClick(scenario)}
                 onPointerOver={() => {}}
                 onPointerOut={() => {}}
               />

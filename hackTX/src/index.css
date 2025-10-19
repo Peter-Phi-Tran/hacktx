@@ -454,13 +454,13 @@ body {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 500px;
+  width: 75%;
+  max-width: 380px;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(147, 197, 253, 0.3);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 12px;
+  padding: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.3s ease-out;
 }
@@ -480,12 +480,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .details-header h2 {
   color: #ffffff;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0;
   background: linear-gradient(135deg, #ffffff 0%, #93c5fd 100%);
@@ -498,15 +498,15 @@ body {
   background: none;
   border: none;
   color: #94a3b8;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s;
 }
 
@@ -518,42 +518,42 @@ body {
 .details-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .detail-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .label {
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .value {
   color: #ffffff;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .affordability-badge {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
   width: fit-content;
 }
 
 .why-text {
   color: #cbd5e1;
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 8px 0 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 6px 0 0 0;
 }
 
 .explore-btn {
