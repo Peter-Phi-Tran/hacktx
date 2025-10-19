@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Constellation3D } from './Constellation3D'
 import { ConfigPanel } from './ConfigPanel'
+import { LoadingSpinner } from './LoadingSpinner'
+import { ErrorMessage } from './ErrorMessage'
 import type { FinancialConfig, VehicleStar } from '../types'
+import { analyzeFinancialProfile } from '../api/client'
 
 interface FinancialDashboardProps {
   onLogout?: () => void
@@ -152,15 +155,85 @@ export const FinancialDashboard = ({ onLogout }: FinancialDashboardProps = {}) =
   })
 
   const [stars, setStars] = useState<VehicleStar[]>(generateStars(config))
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Toggle to switch between API and mock data (for development/fallback)
+  const useApi = true
 
-  const handleAnalyze = () => {
-    // Regenerate constellation based on new config
-    const newStars = generateStars(config)
-    setStars(newStars)
+  // Load initial data on mount
+  useEffect(() => {
+    if (useApi) {
+      handleAnalyze()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAnalyze = async () => {
+    // Fallback to mock data if API is disabled
+    if (!useApi) {
+      const newStars = generateStars(config)
+      setStars(newStars)
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Call the real API
+      const response = await analyzeFinancialProfile(config)
+      
+      // Convert backend response to VehicleStar format
+      const vehicleStars: VehicleStar[] = response.vehicles.map(vehicle => ({
+        id: vehicle.id,
+        vehicle: vehicle.vehicle,
+        x: vehicle.x,
+        y: vehicle.y,
+        z: vehicle.z,
+        size: vehicle.size,
+        color: vehicle.color,
+        monthly_payment: vehicle.monthly_payment,
+        affordability: vehicle.affordability,
+        price_range: vehicle.price_range,
+        why: vehicle.why
+      }))
+
+      setStars(vehicleStars)
+    } catch (err) {
+      console.error('API Error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to analyze financial profile')
+      
+      // Fallback to mock data on error
+      const fallbackStars = generateStars(config)
+      setStars(fallbackStars)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRetry = () => {
+    setError(null)
+    handleAnalyze()
+  }
+
+  const handleDismissError = () => {
+    setError(null)
   }
 
   return (
     <div className="financial-dashboard">
+      {/* Loading Overlay */}
+      {loading && <LoadingSpinner />}
+      
+      {/* Error Overlay */}
+      {error && (
+        <ErrorMessage 
+          message={error} 
+          onRetry={handleRetry}
+          onDismiss={handleDismissError}
+        />
+      )}
+
       {/* Left Panel - Configuration */}
       <div className="dashboard-panel config-side">
         <ConfigPanel 
