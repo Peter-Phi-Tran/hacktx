@@ -48,6 +48,34 @@ class FinancialProfile(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
+class AnalysisHistory(Base):
+    """Analysis history database model"""
+    __tablename__ = "analysis_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    config_snapshot = Column(Text, nullable=False)  # JSON snapshot of config
+    vehicles_data = Column(Text, nullable=False)  # JSON array of recommended vehicles
+    vehicle_count = Column(Integer)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class VehiclePreference(Base):
+    """User vehicle preferences and interactions"""
+    __tablename__ = "vehicle_preferences"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    vehicle_id = Column(Integer, nullable=False)
+    vehicle_name = Column(String, nullable=False)
+    is_favorite = Column(Integer, default=0)  # 0 = no, 1 = yes
+    view_count = Column(Integer, default=0)
+    last_viewed = Column(DateTime(timezone=True), server_default=func.now())
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
 __all__ = [
     # Schemas
     "FinancialConfig",
@@ -58,6 +86,8 @@ __all__ = [
     "HealthResponse",
     # Database models
     "User",
-    "FinancialProfile"
+    "FinancialProfile",
+    "AnalysisHistory",
+    "VehiclePreference"
 ]
 
