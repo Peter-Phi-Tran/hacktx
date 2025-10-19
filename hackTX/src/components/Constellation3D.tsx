@@ -1,47 +1,18 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stars, PerspectiveCamera } from '@react-three/drei'
-import { useState, useRef, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Car3D } from './Car3D'
-import * as THREE from 'three'
-
-interface VehicleStar {
-  id: number
-  vehicle: string
-  x: number
-  y: number
-  z: number
-  size: number
-  color: string
-  monthly_payment: number
-  affordability: string
-  price_range?: string
-  why?: string
-  parentId?: number
-  scenarioType?: string
-}
-
-interface FinancingScenario {
-  id: number
-  vehicle: string
-  x: number
-  y: number
-  z: number
-  size: number
-  color: string
-  monthly_payment: number
-  affordability: string
-  parentId: number
-  scenarioType: string
-  scenarioName: string
-  details: {
-    downPayment: number
-    loanTerm: number
-    interestRate: number
-    totalCost: number
-    savingsVsBase: number
-  }
-  outcome: string
-}
+import {
+  useConstellationSelection,
+  useFinancingScenarios,
+  useCameraControls,
+  useCarTarget,
+  type VehicleStar,
+  type FinancingScenario
+} from '../hooks/useConstellation'
+import { generateFinancingScenarios } from '../utils/financing'
+import { VehicleSphere } from './VehicleSphere'
+import { UserNode } from './UserNode'
 
 interface UserConfig {
   income: number
@@ -56,220 +27,36 @@ interface Constellation3DProps {
   userConfig: UserConfig
 }
 
-const VehicleSphere = ({ 
-  star, 
-  isSelected, 
-  isHovered, 
-  onClick, 
-  onPointerOver, 
-  onPointerOut 
-}: { 
-  star: VehicleStar
-  isSelected: boolean
-  isHovered: boolean
-  onClick: () => void
-  onPointerOver: () => void
-  onPointerOut: () => void
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const scale = isHovered || isSelected ? 1.5 : 1
-
-  return (
-    <group position={[star.x / 15, star.y / 15, star.z / 15]}>
-      {/* Main sphere */}
-      <mesh
-        ref={meshRef}
-        onClick={onClick}
-        onPointerOver={onPointerOver}
-        onPointerOut={onPointerOut}
-        scale={scale}
-      >
-        <sphereGeometry args={[star.size / 15, 32, 32]} />
-        <meshStandardMaterial 
-          color={star.color} 
-          emissive={star.color}
-          emissiveIntensity={isHovered || isSelected ? 1.5 : 0.5}
-          metalness={0.8}
-          roughness={0.2}
-        />
-      </mesh>
-
-      {/* Glow effect */}
-      <pointLight 
-        position={[0, 0, 0]} 
-        intensity={isHovered || isSelected ? 2 : 1} 
-        distance={3} 
-        color={star.color} 
-      />
-
-      {/* Ring orbit when selected */}
-      {isSelected && (
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[star.size / 12, star.size / 10, 32]} />
-          <meshBasicMaterial color={star.color} opacity={0.3} transparent side={THREE.DoubleSide} />
-        </mesh>
-      )}
-    </group>
-  )
-}
-
-// Center User Node Component - represents the user's financial starting point
-const UserNode = ({ 
-  userConfig: _userConfig, 
-  isHovered, 
-  onPointerOver, 
-  onPointerOut,
-  onClick 
-}: { 
-  userConfig: UserConfig
-  isHovered: boolean
-  onPointerOver: () => void
-  onPointerOut: () => void
-  onClick: () => void
-}) => {
-  const scale = isHovered ? 1.3 : 1
-
-  return (
-    <group position={[0, 0, 0]}>
-      {/* Main sphere */}
-      <mesh
-        onClick={onClick}
-        onPointerOver={onPointerOver}
-        onPointerOut={onPointerOut}
-        scale={scale}
-      >
-        <sphereGeometry args={[0.8, 32, 32]} />
-        <meshStandardMaterial 
-          color="#93c5fd" 
-          emissive="#93c5fd"
-          emissiveIntensity={isHovered ? 1.2 : 0.8}
-          metalness={0.9}
-          roughness={0.1}
-        />
-      </mesh>
-
-      {/* Pulsing glow effect */}
-      <pointLight 
-        position={[0, 0, 0]} 
-        intensity={isHovered ? 3 : 2} 
-        distance={5} 
-        color="#93c5fd" 
-      />
-
-      {/* Rotating ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1.2, 1.4, 32]} />
-        <meshBasicMaterial color="#93c5fd" opacity={0.5} transparent side={THREE.DoubleSide} />
-      </mesh>
-    </group>
-  )
-}
-
-// Generate 5 financing scenario child nodes around a parent star
-const generateFinancingScenarios = (parentStar: VehicleStar, parentIndex: number): FinancingScenario[] => {
-  const basePrice = parentStar.monthly_payment * 60 // Estimate base price from 60-month payment
-  const scenarios = [
-    {
-      name: 'Low Down Payment',
-      downPayment: 0,
-      loanTerm: 72,
-      interestRate: 6.5,
-      color: '#fbbf24',
-      affordability: 'stretch'
-    },
-    {
-      name: 'Standard Plan',
-      downPayment: basePrice * 0.1,
-      loanTerm: 60,
-      interestRate: 5.5,
-      color: '#60a5fa',
-      affordability: 'good'
-    },
-    {
-      name: 'High Down Payment',
-      downPayment: basePrice * 0.2,
-      loanTerm: 48,
-      interestRate: 4.5,
-      color: '#4ade80',
-      affordability: 'excellent'
-    },
-    {
-      name: 'Short Term',
-      downPayment: basePrice * 0.15,
-      loanTerm: 36,
-      interestRate: 4.0,
-      color: '#4ade80',
-      affordability: 'excellent'
-    },
-    {
-      name: 'Extended Term',
-      downPayment: basePrice * 0.05,
-      loanTerm: 84,
-      interestRate: 7.0,
-      color: '#fbbf24',
-      affordability: 'stretch'
-    }
-  ]
-
-  // Position child nodes close together in 3D space around the parent for constellation effect
-  const radiusVariations = [2, 3, 2.5, 3.5, 2.8] // Close distances from parent
-  const zOffsets = [-1.5, 1, -1, 2, 0.5] // Small varied Z positions
-  const angleOffsets = [0.3, -0.2, 0.5, -0.4, 0.1] // Asymmetry
-  
-  return scenarios.map((scenario, index) => {
-    const baseAngle = (index / scenarios.length) * Math.PI * 2
-    const angle = baseAngle + angleOffsets[index]
-    const radius = radiusVariations[index]
-    
-    const xOffset = Math.cos(angle) * radius
-    const yOffset = Math.sin(angle) * radius
-    const zOffset = zOffsets[index]
-
-    const loanAmount = basePrice - scenario.downPayment
-    const monthlyRate = scenario.interestRate / 100 / 12
-    const numPayments = scenario.loanTerm
-    const monthlyPayment = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
-                          (Math.pow(1 + monthlyRate, numPayments) - 1)
-    const totalCost = monthlyPayment * scenario.loanTerm + scenario.downPayment
-    const baseTotalCost = parentStar.monthly_payment * 60 + (basePrice * 0.1)
-
-    return {
-      id: parentIndex * 1000 + index + 1,
-      vehicle: `${parentStar.vehicle} - ${scenario.name}`,
-      x: parentStar.x + xOffset * 15,
-      y: parentStar.y + yOffset * 15,
-      z: parentStar.z + zOffset * 15,
-      size: 6,
-      color: scenario.color,
-      monthly_payment: Math.round(monthlyPayment),
-      affordability: scenario.affordability,
-      parentId: parentStar.id,
-      scenarioType: scenario.name.toLowerCase().replace(/ /g, '_'),
-      scenarioName: scenario.name,
-      details: {
-        downPayment: Math.round(scenario.downPayment),
-        loanTerm: scenario.loanTerm,
-        interestRate: scenario.interestRate,
-        totalCost: Math.round(totalCost),
-        savingsVsBase: Math.round(baseTotalCost - totalCost)
-      },
-      outcome: totalCost < baseTotalCost 
-        ? `Save $${Math.abs(Math.round(baseTotalCost - totalCost)).toLocaleString()} over standard plan`
-        : `Costs $${Math.abs(Math.round(baseTotalCost - totalCost)).toLocaleString()} more than standard plan`
-    }
-  })
-}
-
 export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => {
-  const [selectedStar, setSelectedStar] = useState<VehicleStar | null>(null)
-  const [hoveredStar, setHoveredStar] = useState<VehicleStar | null>(null)
-  const [showUserInfo, setShowUserInfo] = useState(false)
-  const [isHoveringUser, setIsHoveringUser] = useState(false)
-  const [financingScenarios, setFinancingScenarios] = useState<FinancingScenario[]>([])
-  const [expandedStarId, setExpandedStarId] = useState<number | null>(null)
-  const [selectedScenario, setSelectedScenario] = useState<FinancingScenario | null>(null)
-  const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([0, 0, 0])
-  const controlsRef = useRef<any>(null)
+  // Use custom hooks for state management
+  const {
+    selectedStar, setSelectedStar,
+    hoveredStar, setHoveredStar,
+    selectedScenario, setSelectedScenario,
+    showUserInfo, setShowUserInfo,
+    isHoveringUser, setIsHoveringUser
+  } = useConstellationSelection()
+
+  const {
+    financingScenarios,
+    expandedStarId,
+    addScenarios
+  } = useFinancingScenarios()
+
+  const {
+    cameraTarget,
+    controlsRef,
+    focusOnNode
+  } = useCameraControls()
+
+  // Get target position for car to move to
+  const targetPosition = useCarTarget(
+    selectedStar,
+    hoveredStar,
+    selectedScenario,
+    isHoveringUser,
+    showUserInfo
+  )
 
   // Update camera target when a node is clicked
   useEffect(() => {
@@ -282,37 +69,27 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
   // Handle node selection and update camera focus
   const handleStarClick = (star: VehicleStar) => {
     setSelectedStar(star)
-    setCameraTarget([star.x / 15, star.y / 15, star.z / 15])
+    focusOnNode(star.x / 15, star.y / 15, star.z / 15)
   }
 
   const handleScenarioClick = (scenario: FinancingScenario) => {
     setSelectedScenario(scenario)
-    setCameraTarget([scenario.x / 15, scenario.y / 15, scenario.z / 15])
+    focusOnNode(scenario.x / 15, scenario.y / 15, scenario.z / 15)
   }
 
   const handleUserNodeClick = () => {
     setShowUserInfo(!showUserInfo)
-    setCameraTarget([0, 0, 0])
+    focusOnNode(0, 0, 0)
   }
 
   // Handle exploring financing options
   const handleExploreFinancing = () => {
     if (selectedStar && !selectedStar.parentId) {
       const scenarios = generateFinancingScenarios(selectedStar, selectedStar.id)
-      setFinancingScenarios(prev => [...prev, ...scenarios])
-      setExpandedStarId(selectedStar.id)
+      addScenarios(scenarios, selectedStar.id)
       setSelectedStar(null) // Close the details panel
     }
   }
-
-  // Get target position for car to move to (vehicle star, scenario, or user node)
-  const targetPosition = selectedScenario
-    ? [selectedScenario.x / 15, selectedScenario.y / 15, selectedScenario.z / 15] as [number, number, number]
-    : (hoveredStar || selectedStar)
-      ? [(hoveredStar || selectedStar)!.x / 15, (hoveredStar || selectedStar)!.y / 15, (hoveredStar || selectedStar)!.z / 15] as [number, number, number]
-      : (isHoveringUser || showUserInfo) 
-        ? [0, 0, 0] as [number, number, number]
-        : null
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -405,8 +182,6 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
             </group>
           )
         })}
-
-        {/* Grid helper removed - was visible at bottom */}
       </Canvas>
 
       {/* Legend - positioned over the 3D scene */}
@@ -620,9 +395,9 @@ export const Constellation3D = ({ stars, userConfig }: Constellation3DProps) => 
         border: '1px solid rgba(147, 197, 253, 0.2)',
       }}>
         <div>🌟 <strong>Center node:</strong> Your financial profile</div>
-        <div>� <strong>Car:</strong> Orbits hovered/selected vehicles</div>
+        <div>🚗 <strong>Car:</strong> Orbits hovered/selected vehicles</div>
         <div>👆 <strong>Hover:</strong> Vehicle stars to explore</div>
-        <div>� <strong>Click:</strong> View detailed information</div>
+        <div>👉 <strong>Click:</strong> View detailed information</div>
         <div>🖱️ <strong>Drag:</strong> Rotate • <strong>Scroll:</strong> Zoom</div>
       </div>
     </div>
