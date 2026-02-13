@@ -76,7 +76,7 @@ function generateCircularPosition(
   };
 
   console.log(
-    `🎯 Node ${
+    `Node ${
       index + 1
     }/${total} positioned at ${angleDegrees}° - (x: ${position.x.toFixed(
       1
@@ -92,7 +92,7 @@ function generateCircularPosition(
 export function transformScenariosToStars(
   scenarios: Record<string, unknown>[]
 ): VehicleStar[] {
-  console.log("🎨 Transforming scenarios with plan types:");
+  console.log("Transforming scenarios with plan types:");
   
   return scenarios.map((scenario, index) => {
     // Type cast the scenario (convert through unknown first for safety)
@@ -118,7 +118,7 @@ export function transformScenariosToStars(
       monthly_payment: s.monthly_payment,
       affordability: getAffordability(s.positivity_score),
       price_range: `$${s.monthly_payment}/mo for ${s.term_months} months`,
-      why: `${s.title}\n\n${s.description}\n\n💡 ${s.recommendations}`,
+      why: `${s.title}\n\n${s.description}\n\n${s.recommendations}`,
       scenarioType: s.plan_type,
     };
 
@@ -256,7 +256,7 @@ export function generateChildNodePositions(
         const parentDistFromCenter = Math.sqrt(parentX ** 2 + parentY ** 2 + parentZ ** 2);
         
         console.log(
-          `   🌿 Child ${i + 1}/${childCount} at ${(
+          `   Child ${i + 1}/${childCount} at ${(
             (adjustedAngle * 180) /
             Math.PI
           ).toFixed(1)}° - Distance from center: ${distFromCenter.toFixed(1)} (parent: ${parentDistFromCenter.toFixed(1)}) z-offset: ${zVariation.toFixed(1)}`
@@ -264,7 +264,7 @@ export function generateChildNodePositions(
       } else {
         attempts++;
         if (attempts < maxAttempts) {
-          console.log(`   ⚠️ Collision detected for child ${i + 1}, retrying (attempt ${attempts}/${maxAttempts})...`);
+          console.log(`   Collision detected for child ${i + 1}, retrying (attempt ${attempts}/${maxAttempts})...`);
         }
       }
     }
@@ -286,7 +286,7 @@ export function generateChildNodePositions(
       const z = parentZ + outwardDirection.z * outwardDistance + circleZ * childRadius + zVariation;
       
       position = { x, y, z };
-      console.warn(`   ⚠️ Child ${i + 1} placed despite potential collision (max attempts reached)`);
+      console.warn(`   Child ${i + 1} placed despite potential collision (max attempts reached)`);
     }
 
     positions.push(position);

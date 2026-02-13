@@ -463,5 +463,5 @@ Generate 3 variations for {focus['name']}:"""
         print(f"Response was: {node_maker_response[:500]}")
         raise ValueError(f"Failed to parse child scenarios: {str(e)}")
 
-    print(f"✅ Generated {len(scenarios)} level-{branch_level} ({focus['name']}) scenarios")
+    print(f"Generated {len(scenarios)} level-{branch_level} ({focus['name']}) scenarios")
     return scenarios

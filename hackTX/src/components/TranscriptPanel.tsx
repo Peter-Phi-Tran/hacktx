@@ -46,9 +46,9 @@ function Avatar({ type }: { type: "agent" | "user" }) {
   return (
     <div className={`avatar ${type}-avatar`}>
       {type === "agent" ? (
-        <span className="star-icon">⭐</span>
+        <span className="star-icon">*</span>
       ) : (
-        <span>👤</span>
+        <span>U</span>
       )}
     </div>
   );

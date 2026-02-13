@@ -305,7 +305,7 @@ export const Constellation3D = ({
           <span>Lease Plans</span>
         </div>
         <div className="legend-item">
-          <span className="legend-text">⭐</span>
+          <span className="legend-text">*</span>
           <span>Larger = Better Match</span>
         </div>
       </div>
@@ -325,19 +325,19 @@ export const Constellation3D = ({
         }}
       >
         <div>
-          🌟 <strong>Center node:</strong> Your financial profile
+          <strong>Center node:</strong> Your financial profile
         </div>
         <div>
-          🚗 <strong>Car:</strong> Orbits hovered/selected vehicles
+          <strong>Car:</strong> Orbits hovered/selected vehicles
         </div>
         <div>
-          👆 <strong>Hover:</strong> Vehicle stars to explore
+          <strong>Hover:</strong> Vehicle stars to explore
         </div>
         <div>
-          👉 <strong>Click:</strong> View detailed information
+          <strong>Click:</strong> View detailed information
         </div>
         <div>
-          🖱️ <strong>Drag:</strong> Rotate • <strong>Scroll:</strong> Zoom
+          <strong>Drag:</strong> Rotate • <strong>Scroll:</strong> Zoom
         </div>
       </div>
     </div>

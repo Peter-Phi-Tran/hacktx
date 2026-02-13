@@ -42,7 +42,7 @@ export function ScenarioDetailsModal({
         errorMessage.includes("Invalid or expired token")
       ) {
         alert(
-          "🔐 Session Expired\n\nYour login session has expired.\n\nPlease refresh the page and log in again to continue."
+          "Session Expired\n\nYour login session has expired.\n\nPlease refresh the page and log in again to continue."
         );
         // Optionally trigger logout
         window.location.reload();
@@ -52,7 +52,7 @@ export function ScenarioDetailsModal({
         errorMessage.includes("quota")
       ) {
         alert(
-          "⚠️ API Quota Exceeded\n\nThe Google Gemini API free tier limit (50 requests/day) has been reached.\n\nPlease:\n1. Wait a few minutes and try again\n2. Or upgrade to a paid API plan\n3. Or use a different API key"
+          "API Quota Exceeded\n\nThe Google Gemini API free tier limit (50 requests/day) has been reached.\n\nPlease:\n1. Wait a few minutes and try again\n2. Or upgrade to a paid API plan\n3. Or use a different API key"
         );
       } else {
         alert(
@@ -115,7 +115,7 @@ export function ScenarioDetailsModal({
           <div className="detail-row">
             <span className="label">Plan Type</span>
             <span className="value">
-              {star.scenarioType === "finance" ? "🏦 Financing" : "📄 Lease"}
+              {star.scenarioType === "finance" ? "Financing" : "Lease"}
             </span>
           </div>
         )}
@@ -141,10 +141,10 @@ export function ScenarioDetailsModal({
         }}
       >
         {isExpanding
-          ? "🔄 Generating..."
+          ? "Generating..."
           : star.isExpanded
           ? "Already Expanded"
-          : "🚗 Let's Go Places"}
+          : "Let's Go Places"}
       </button>
     </div>
   );

@@ -16,9 +16,9 @@ function getAuthHeaders(): HeadersInit {
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
-    console.log("🔑 Using auth token:", token.substring(0, 10) + "...");
+    console.log("Using auth token:", token.substring(0, 10) + "...");
   } else {
-    console.warn("⚠️ No auth token found!");
+    console.warn("No auth token found!");
   }
 
   return headers;
@@ -110,7 +110,7 @@ export const interviewAPI = {
     children: Record<string, unknown>[];
     branch_level: number;
   }> {
-    console.log("🔧 expandNode API call:", {
+    console.log("expandNode API call:", {
       parentScenario,
       userProfile,
       branchLevel,
@@ -129,7 +129,7 @@ export const interviewAPI = {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ API Error Response:", {
+      console.error("API Error Response:", {
         status: response.status,
         statusText: response.statusText,
         error: errorText,
@@ -138,7 +138,7 @@ export const interviewAPI = {
     }
 
     const data = await response.json();
-    console.log("✅ API Response Success:", data);
+    console.log("API Response Success:", data);
     return data;
   },
 };

@@ -120,7 +120,7 @@ export const ConstellationDemo = ({
       loan_term: config.loanTerm || 60,
     };
 
-    console.log("📦 Prepared data:", { parentScenario, userProfile });
+    console.log("Prepared data:", { parentScenario, userProfile });
 
     try {
       // Calculate the next branch level
@@ -215,7 +215,7 @@ export const ConstellationDemo = ({
             monthly_payment: c.monthly_payment,
             affordability: affordability,
             price_range: `$${c.monthly_payment}/mo for ${c.term_months} months`,
-            why: `${c.title}\n\n${c.description}\n\n💡 ${c.recommendations}`,
+            why: `${c.title}\n\n${c.description}\n\n${c.recommendations}`,
             parentId: parentStar.id,
             scenarioType: inheritedPlanType,
             level: nextLevel,

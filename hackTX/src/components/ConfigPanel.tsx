@@ -63,7 +63,7 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
 
       {/* Controls Guide */}
       <div className="controls-section">
-        <h2 className="section-title">🎮 Controls</h2>
+        <h2 className="section-title">Controls</h2>
         <div className="controls-list">
           <div className="control-item">
             <kbd className="kbd">Click</kbd>
@@ -82,7 +82,7 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
 
       {/* Simplified Filters */}
       <div className="section-card">
-        <h2 className="section-title">💰 Budget Settings</h2>
+        <h2 className="section-title">Budget Settings</h2>
 
         {/* Monthly Budget */}
         <div className="param-control">
@@ -132,7 +132,7 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
 
       {/* Simplified Vehicle Types */}
       <div className="section-card">
-        <h2 className="section-title">🚗 Vehicle Types</h2>
+        <h2 className="section-title">Vehicle Types</h2>
         <div className="vehicle-types-grid">
           {vehicleTypeOptions.slice(0, 4).map((type) => (
             <button

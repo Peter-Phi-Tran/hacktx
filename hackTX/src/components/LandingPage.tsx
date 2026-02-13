@@ -124,7 +124,7 @@ export const LandingPage = () => {
             transition={{ delay: 1.6, duration: 0.5 }}
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
           >
-            <div className="feature-icon">✦</div>
+            <div className="feature-icon">*</div>
             <span>AI-Powered Insights</span>
           </motion.div>
           <motion.div
@@ -134,7 +134,7 @@ export const LandingPage = () => {
             transition={{ delay: 1.7, duration: 0.5 }}
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
           >
-            <div className="feature-icon">⊛</div>
+            <div className="feature-icon">*</div>
             <span>Vehicle Financial Services</span>
           </motion.div>
           <motion.div
@@ -144,7 +144,7 @@ export const LandingPage = () => {
             transition={{ delay: 1.8, duration: 0.5 }}
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
           >
-            <div className="feature-icon">✧</div>
+            <div className="feature-icon">*</div>
             <span>Personalized Path</span>
           </motion.div>
         </motion.div>

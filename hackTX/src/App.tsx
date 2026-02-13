@@ -109,7 +109,7 @@ function App() {
           gap: "20px",
         }}
       >
-        <div style={{ color: "#ef4444" }}>❌ {error}</div>
+        <div style={{ color: "#ef4444" }}>{error}</div>
         <button
           onClick={() => {
             setError(null);
